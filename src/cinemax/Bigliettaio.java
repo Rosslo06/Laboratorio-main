@@ -24,6 +24,10 @@ public class Bigliettaio extends Utente {
         super(nome, cognome, username, password, dataNascita, luogoDomicilio, "bigliettaio");
     }
     
+    /**
+     * Restituisce la rappresentazione in stringa del bigliettaio
+     * @return stringa con informazioni del bigliettaio
+     */
     @Override
     public String toString() {
         return "Bigliettaio{" +

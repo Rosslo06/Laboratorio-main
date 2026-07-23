@@ -24,6 +24,10 @@ public class Cliente extends Utente {
         super(nome, cognome, username, password, dataNascita, luogoDomicilio, "cliente");
     }
     
+    /**
+     * Restituisce la rappresentazione in stringa del cliente
+     * @return stringa con informazioni del cliente
+     */
     @Override
     public String toString() {
         return "Cliente{" +

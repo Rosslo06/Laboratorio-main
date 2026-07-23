@@ -24,6 +24,10 @@ public class Proiezionista extends Utente {
         super(nome, cognome, username, password, dataNascita, luogoDomicilio, "proiezionista");
     }
     
+    /**
+     * Restituisce la rappresentazione in stringa del proiezionista
+     * @return stringa con informazioni del proiezionista
+     */
     @Override
     public String toString() {
         return "Proiezionista{" +

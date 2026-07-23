@@ -70,55 +70,106 @@ public abstract class Utente implements Serializable {
         return this.passwordHash.equals(hashPassword(password));
     }
     
-    // Getter e Setter
+    /**
+     * Ottiene il nome dell'utente
+     * @return il nome
+     */
     public String getNome() {
         return nome;
     }
     
+    /**
+     * Imposta il nome dell'utente
+     * @param nome il nome da impostare
+     */
     public void setNome(String nome) {
         this.nome = nome;
     }
     
+    /**
+     * Ottiene il cognome dell'utente
+     * @return il cognome
+     */
     public String getCognome() {
         return cognome;
     }
     
+    /**
+     * Imposta il cognome dell'utente
+     * @param cognome il cognome da impostare
+     */
     public void setCognome(String cognome) {
         this.cognome = cognome;
     }
     
+    /**
+     * Ottiene lo username dell'utente
+     * @return lo username
+     */
     public String getUsername() {
         return username;
     }
     
+    /**
+     * Imposta lo username dell'utente
+     * @param username lo username da impostare
+     */
     public void setUsername(String username) {
         this.username = username;
     }
     
+    /**
+     * Ottiene la data di nascita dell'utente
+     * @return la data di nascita
+     */
     public LocalDate getDataNascita() {
         return dataNascita;
     }
     
+    /**
+     * Imposta la data di nascita dell'utente
+     * @param dataNascita la data di nascita da impostare
+     */
     public void setDataNascita(LocalDate dataNascita) {
         this.dataNascita = dataNascita;
     }
     
+    /**
+     * Ottiene il luogo di domicilio dell'utente
+     * @return il luogo di domicilio
+     */
     public String getLuogoDomicilio() {
         return luogoDomicilio;
     }
     
+    /**
+     * Imposta il luogo di domicilio dell'utente
+     * @param luogoDomicilio il luogo di domicilio da impostare
+     */
     public void setLuogoDomicilio(String luogoDomicilio) {
         this.luogoDomicilio = luogoDomicilio;
     }
     
+    /**
+     * Ottiene il ruolo dell'utente (cliente, proiezionista, bigliettaio)
+     * @return il ruolo
+     */
     public String getRuolo() {
         return ruolo;
     }
     
+    /**
+     * Imposta il ruolo dell'utente
+     * @param ruolo il ruolo da impostare
+     */
     public void setRuolo(String ruolo) {
         this.ruolo = ruolo;
     }
     
+    /**
+     * Restituisce la rappresentazione in stringa dell'utente
+     * @return stringa con informazioni dell'utente
+     */
     @Override
     public String toString() {
         return "Utente{" +
