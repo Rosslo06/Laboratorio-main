@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class GestoreDati {
     private static final String DIR_DATA = "data";
-    private static final String FILE_PROIEZIONI = "data/proiezioni.txt";
+    private static final String FILE_PROIEZIONI = "data/proiezioni (1).csv";
     private static final String FILE_UTENTI = "data/utenti.txt";
     private static final String FILE_PRENOTAZIONI = "data/prenotazioni.txt";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
