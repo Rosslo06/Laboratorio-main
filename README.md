@@ -116,9 +116,10 @@ CineMax (interfaccia utente)
 - **Interfaccia**: Terminal User Interface (TUI)
 
 ## Come Eseguire
-1. Compilare: `javac src/cinemax/*.java -d bin`
-2. Eseguire: `java -cp bin cinemax.CineMax`
-3. Seguire le istruzioni a schermo
+1. Aprire il terminale nella cartella del progetto.
+2. Compilare: `javac src/cinemax/*.java -d bin`
+3. Eseguire: `java -cp bin CineMax`
+4. Seguire le istruzioni a schermo
 
 ## Autori
 - **Rossetti Andrea** - Film, Proiezioni, Persistenza Dati

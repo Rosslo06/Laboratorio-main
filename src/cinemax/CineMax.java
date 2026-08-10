@@ -2,6 +2,7 @@
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
@@ -30,6 +31,9 @@ public class CineMax {
         boolean esecuzione = true;
         
         while (esecuzione) {
+            if (!scanner.hasNextLine()) {
+                break;
+            }
             if (sistema.getUtenteCorrente() == null) {
                 esecuzione = menuPrincipale();
             } else {
@@ -102,10 +106,15 @@ public class CineMax {
         boolean continuaGuest = true;
         
         while (continuaGuest) {
+            if (!scanner.hasNextLine()) {
+                break;
+            }
+
             System.out.println("\n========== MENU GUEST ==========");
             System.out.println("1. Cerca proiezioni");
-            System.out.println("2. Visualizza dettagli proiezione");
-            System.out.println("3. Torna al menu principale");
+            System.out.println("2. Proiezioni di un giorno");
+            System.out.println("3. Visualizza dettagli proiezione");
+            System.out.println("4. Torna al menu principale");
             System.out.print("Scelta: ");
             
             String scelta = scanner.nextLine().trim();
@@ -115,9 +124,12 @@ public class CineMax {
                     cercaProiezioni();
                     break;
                 case "2":
-                    visualizzaDettagliProiezione();
+                    visualizzaProiezioniDelGiorno();
                     break;
                 case "3":
+                    visualizzaDettagliProiezione();
+                    break;
+                case "4":
                     continuaGuest = false;
                     break;
                 default:
@@ -134,14 +146,19 @@ public class CineMax {
         boolean continuaCliente = true;
         
         while (continuaCliente) {
+            if (!scanner.hasNextLine()) {
+                break;
+            }
+
             System.out.println("\n========== MENU CLIENTE ==========");
             System.out.println("1. Cerca proiezioni");
-            System.out.println("2. Visualizza dettagli proiezione");
-            System.out.println("3. Le mie prenotazioni");
-            System.out.println("4. Crea nuova prenotazione");
-            System.out.println("5. Modifica prenotazione");
-            System.out.println("6. Cancella prenotazione");
-            System.out.println("7. Logout");
+            System.out.println("2. Proiezioni di un giorno");
+            System.out.println("3. Visualizza dettagli proiezione");
+            System.out.println("4. Le mie prenotazioni");
+            System.out.println("5. Crea nuova prenotazione");
+            System.out.println("6. Modifica prenotazione");
+            System.out.println("7. Cancella prenotazione");
+            System.out.println("8. Logout");
             System.out.print("Scelta: ");
             
             String scelta = scanner.nextLine().trim();
@@ -151,21 +168,24 @@ public class CineMax {
                     cercaProiezioni();
                     break;
                 case "2":
-                    visualizzaDettagliProiezione();
+                    visualizzaProiezioniDelGiorno();
                     break;
                 case "3":
-                    visualizzaPrenotazioniCliente();
+                    visualizzaDettagliProiezione();
                     break;
                 case "4":
-                    creaPrenotazione();
+                    visualizzaPrenotazioniCliente();
                     break;
                 case "5":
-                    modificaPrenotazione();
+                    creaPrenotazione();
                     break;
                 case "6":
-                    cancellaPrenotazione();
+                    modificaPrenotazione();
                     break;
                 case "7":
+                    cancellaPrenotazione();
+                    break;
+                case "8":
                     sistema.logout();
                     return true;
                 default:
@@ -184,6 +204,10 @@ public class CineMax {
         boolean continua = true;
         
         while (continua) {
+            if (!scanner.hasNextLine()) {
+                break;
+            }
+
             System.out.println("\n========== MENU PROIEZIONISTA ==========");
             System.out.println("1. Aggiungi proiezione");
             System.out.println("2. Modifica proiezione");
@@ -226,6 +250,10 @@ public class CineMax {
         boolean continua = true;
         
         while (continua) {
+            if (!scanner.hasNextLine()) {
+                break;
+            }
+
             System.out.println("\n========== MENU BIGLIETTAIO ==========");
             System.out.println("1. Visualizza prenotazioni di oggi");
             System.out.println("2. Cerca prenotazione");
@@ -313,6 +341,7 @@ public class CineMax {
      */
     private void cercaProiezioni() {
         System.out.println("\n========== RICERCA PROIEZIONI ==========");
+        System.out.println("Lascia vuoto un campo per non applicare il filtro.");
         System.out.print("Titolo film [opzionale]: ");
         String titolo = scanner.nextLine().trim();
         
@@ -335,7 +364,7 @@ public class CineMax {
         LocalDateTime dataFine = null;
         if (!dataFineStr.isEmpty()) {
             try {
-                dataFine = LocalDate.parse(dataFineStr, DATE_FORMATTER).atStartOfDay();
+                dataFine = LocalDate.parse(dataFineStr, DATE_FORMATTER).atTime(LocalTime.MAX);
             } catch (Exception e) {
                 System.out.println("Formato data non valido!");
             }
@@ -372,6 +401,44 @@ public class CineMax {
             costoMax
         );
         
+        mostraRisultatiProiezioni(risultati);
+    }
+
+    private void visualizzaProiezioniDelGiorno() {
+        System.out.println("\n========== PROIEZIONI DI UN GIORNO ==========");
+        System.out.print("Data (yyyy-MM-dd, oppure oggi): ");
+        String dataStr = scanner.nextLine().trim();
+
+        if (dataStr.isEmpty()) {
+            System.out.println("Nessuna data inserita.");
+            return;
+        }
+
+        LocalDate data;
+        if (dataStr.equalsIgnoreCase("oggi")) {
+            data = LocalDate.now();
+        } else {
+            try {
+                data = LocalDate.parse(dataStr, DATE_FORMATTER);
+            } catch (Exception e) {
+                System.out.println("Formato data non valido!");
+                return;
+            }
+        }
+
+        List<Proiezione> risultati = sistema.cercaProiezioni(
+            null,
+            null,
+            data.atStartOfDay(),
+            data.atTime(LocalTime.MAX),
+            -1,
+            -1
+        );
+
+        mostraRisultatiProiezioni(risultati);
+    }
+
+    private void mostraRisultatiProiezioni(List<Proiezione> risultati) {
         if (risultati.isEmpty()) {
             System.out.println("Nessuna proiezione trovata!");
         } else {

@@ -98,10 +98,8 @@ public class Sistema {
                     p.getFilm().getTitolo().toLowerCase().contains(titolo.toLowerCase()))
             .filter(p -> genere == null || genere.isEmpty() || 
                     p.getFilm().getGenere().equalsIgnoreCase(genere))
-            .filter(p -> dataDa == null || p.getDataOraProiezione().isAfter(dataDa) || 
-                    p.getDataOraProiezione().isEqual(dataDa))
-            .filter(p -> dataA == null || p.getDataOraProiezione().isBefore(dataA) || 
-                    p.getDataOraProiezione().isEqual(dataA))
+            .filter(p -> dataDa == null || !p.getDataOraProiezione().isBefore(dataDa))
+            .filter(p -> dataA == null || !p.getDataOraProiezione().isAfter(dataA))
             .filter(p -> costoMin < 0 || p.getCostoBiglietto() >= costoMin)
             .filter(p -> costoMax < 0 || p.getCostoBiglietto() <= costoMax)
             .collect(Collectors.toList());
@@ -377,7 +375,6 @@ public class Sistema {
     }
 
     public int calcolaPostiOccupati(int id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'calcolaPostiOccupati'");
+        return calcolaPostiOccupati1(id);
     }
 }

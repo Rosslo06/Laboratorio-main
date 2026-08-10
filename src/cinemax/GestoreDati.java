@@ -1,6 +1,8 @@
 
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.security.CodeSource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,18 +14,165 @@ import java.util.*;
  * @version 1.0
  */
 public class GestoreDati {
-    private static final String DIR_DATA = "data";
-    private static final String FILE_PROIEZIONI = "data/proiezioni.txt";
-    private static final String FILE_UTENTI = "data/utenti.txt";
-    private static final String FILE_PRENOTAZIONI = "data/prenotazioni.txt";
+    private static final String DATA_DIR = "src/cinemax/data";
+    private static final String LEGACY_DATA_DIR = "data";
+    private static final String FILE_PROIEZIONI = "proiezioni.txt";
+    private static final String FILE_PROIEZIONI_CSV = "proiezioni (1).csv";
+    private static final String FILE_UTENTI = "utenti.txt";
+    private static final String FILE_PRENOTAZIONI = "prenotazioni.txt";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final DateTimeFormatter CSV_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
     static {
-        File dir = new File(DIR_DATA);
+        File dir = getDataDirectory();
         if (!dir.exists()) {
-            dir.mkdir();
+            dir.mkdirs();
         }
+    }
+
+    private static File getDataDirectory() {
+        File preferred = resolveExistingDataDirectory();
+        if (preferred != null) {
+            preferred.mkdirs();
+            return preferred;
+        }
+
+        File fallback = new File(getProjectRoot(), DATA_DIR);
+        fallback.mkdirs();
+        return fallback;
+    }
+
+    private static File resolveExistingDataDirectory() {
+        List<File> candidates = new ArrayList<>();
+        candidates.add(new File(System.getProperty("user.dir"), DATA_DIR).getAbsoluteFile());
+        candidates.add(new File(System.getProperty("user.dir"), LEGACY_DATA_DIR).getAbsoluteFile());
+        candidates.add(new File(getProjectRoot(), DATA_DIR).getAbsoluteFile());
+        candidates.add(new File(getProjectRoot(), LEGACY_DATA_DIR).getAbsoluteFile());
+
+        for (File candidate : candidates) {
+            if (candidate.exists() && candidate.isDirectory()) {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private static File getProjectRoot() {
+        List<File> candidates = new ArrayList<>();
+        candidates.add(new File(System.getProperty("user.dir")).getAbsoluteFile());
+
+        try {
+            CodeSource codeSource = GestoreDati.class.getProtectionDomain().getCodeSource();
+            if (codeSource != null) {
+                File location = new File(codeSource.getLocation().toURI()).getAbsoluteFile();
+                candidates.add(location);
+                if (location.getName().equals("bin")) {
+                    candidates.add(location.getParentFile());
+                }
+                File parent = location.getParentFile();
+                if (parent != null) {
+                    candidates.add(parent);
+                }
+            }
+        } catch (URISyntaxException e) {
+            // ignore and continue with fallbacks
+        }
+
+        for (File candidate : candidates) {
+            if (candidate == null) {
+                continue;
+            }
+            File dataDir = new File(candidate, DATA_DIR);
+            if (dataDir.exists() && dataDir.isDirectory()) {
+                return candidate;
+            }
+            File legacyDir = new File(candidate, LEGACY_DATA_DIR);
+            if (legacyDir.exists() && legacyDir.isDirectory()) {
+                return candidate;
+            }
+            File srcDir = new File(candidate, "src");
+            if (srcDir.exists() && srcDir.isDirectory()) {
+                return candidate;
+            }
+        }
+
+        return new File(System.getProperty("user.dir")).getAbsoluteFile();
+    }
+
+    private static File resolveDataFile(String fileName) {
+        List<File> candidates = new ArrayList<>();
+        candidates.add(new File(getDataDirectory(), fileName).getAbsoluteFile());
+        candidates.add(new File(getProjectRoot(), DATA_DIR + File.separator + fileName).getAbsoluteFile());
+        candidates.add(new File(getProjectRoot(), LEGACY_DATA_DIR + File.separator + fileName).getAbsoluteFile());
+        candidates.add(new File(System.getProperty("user.dir"), DATA_DIR + File.separator + fileName).getAbsoluteFile());
+        candidates.add(new File(System.getProperty("user.dir"), LEGACY_DATA_DIR + File.separator + fileName).getAbsoluteFile());
+
+        for (File candidate : candidates) {
+            if (candidate.exists()) {
+                return candidate;
+            }
+        }
+
+        return new File(getDataDirectory(), fileName).getAbsoluteFile();
+    }
+
+    private static List<Proiezione> caricaProiezioniDaCsv(File file) {
+        List<Proiezione> proiezioni = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            int proiezioneCount = 0;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty() || line.startsWith("#")) continue;
+                if (line.startsWith("data_ora_proiezione")) continue;
+
+                try {
+                    String[] parts = parseCsvLine(line);
+                    if (parts.length < 8) continue;
+
+                    String dataOraStr = parts[0].trim();
+                    String titolo = parts[1].trim();
+                    String genere = parts[2].trim();
+                    String regista = parts[3].trim();
+                    int anno = Integer.parseInt(parts[4].trim());
+                    int durata = Integer.parseInt(parts[5].trim());
+                    int etaMinima = Integer.parseInt(parts[6].trim());
+                    double costoBiglietto = Double.parseDouble(parts[7].trim());
+
+                    LocalDateTime dataOra = LocalDateTime.parse(dataOraStr, CSV_DATETIME_FORMATTER);
+                    Film film = new Film(titolo, genere, regista, anno, durata, etaMinima);
+                    proiezioni.add(new Proiezione(proiezioneCount++, film, dataOra, costoBiglietto));
+                } catch (Exception e) {
+                    System.err.println("Errore nel parsing della proiezione CSV: " + line);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Errore nella lettura delle proiezioni CSV: " + e.getMessage());
+        }
+
+        return proiezioni;
+    }
+
+    private static String[] parseCsvLine(String line) {
+        List<String> fields = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            } else if (c == ',' && !inQuotes) {
+                fields.add(current.toString().trim());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+
+        fields.add(current.toString().trim());
+        return fields.toArray(new String[0]);
     }
     
     /**
@@ -32,9 +181,13 @@ public class GestoreDati {
      */
     public static List<Proiezione> caricaProiezioni() {
         List<Proiezione> proiezioni = new ArrayList<>();
-        File file = new File(FILE_PROIEZIONI);
+        File file = resolveDataFile(FILE_PROIEZIONI);
         
         if (!file.exists()) {
+            File csvFile = resolveDataFile(FILE_PROIEZIONI_CSV);
+            if (csvFile.exists()) {
+                return caricaProiezioniDaCsv(csvFile);
+            }
             return proiezioni;
         }
         
@@ -76,7 +229,13 @@ public class GestoreDati {
      * @param proiezioni lista di proiezioni da salvare
      */
     public static void salvaProiezioni(List<Proiezione> proiezioni) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PROIEZIONI))) {
+        File file = resolveDataFile(FILE_PROIEZIONI);
+        File parent = file.getParentFile();
+        if (parent != null) {
+            parent.mkdirs();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write("# Formato: titolo;genere;regista;anno;durata;etaMinima;dataOra;costo\n");
             for (Proiezione p : proiezioni) {
                 Film f = p.getFilm();
@@ -98,7 +257,7 @@ public class GestoreDati {
      */
     public static List<Utente> caricaUtenti() {
         List<Utente> utenti = new ArrayList<>();
-        File file = new File(FILE_UTENTI);
+        File file = resolveDataFile(FILE_UTENTI);
         
         if (!file.exists()) {
             creaUtentiDefault(utenti);
@@ -208,7 +367,13 @@ public class GestoreDati {
      * @param utenti lista di utenti da salvare
      */
     public static void salvaUtenti(List<Utente> utenti) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_UTENTI))) {
+        File file = resolveDataFile(FILE_UTENTI);
+        File parent = file.getParentFile();
+        if (parent != null) {
+            parent.mkdirs();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write("# Formato: nome;cognome;username;passwordHash;dataNascita;luogo;ruolo\n");
             for (Utente u : utenti) {
                 String dataNascita = u.getDataNascita() != null ? 
@@ -231,7 +396,7 @@ public class GestoreDati {
      */
     public static List<Prenotazione> caricaPrenotazioni(List<Utente> utenti, List<Proiezione> proiezioni) {
         List<Prenotazione> prenotazioni = new ArrayList<>();
-        File file = new File(FILE_PRENOTAZIONI);
+        File file = resolveDataFile(FILE_PRENOTAZIONI);
         
         if (!file.exists()) {
             return prenotazioni;
@@ -286,7 +451,13 @@ public class GestoreDati {
      * @param prenotazioni lista di prenotazioni da salvare
      */
     public static void salvaPrenotazioni(List<Prenotazione> prenotazioni) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PRENOTAZIONI))) {
+        File file = resolveDataFile(FILE_PRENOTAZIONI);
+        File parent = file.getParentFile();
+        if (parent != null) {
+            parent.mkdirs();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write("# Formato: usernameCliente;idProiezione;numeroBiglietti\n");
             for (Prenotazione p : prenotazioni) {
                 String line = String.format("%s;%d;%d\n",
