@@ -1,5 +1,3 @@
-
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -377,7 +375,6 @@ public class Sistema {
     }
 
     public int calcolaPostiOccupati(int id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'calcolaPostiOccupati'");
+        return calcolaPostiOccupati1(id);
     }
 }

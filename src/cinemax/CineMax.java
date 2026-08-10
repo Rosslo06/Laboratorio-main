@@ -1,5 +1,3 @@
-
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -103,21 +101,25 @@ public class CineMax {
         
         while (continuaGuest) {
             System.out.println("\n========== MENU GUEST ==========");
-            System.out.println("1. Cerca proiezioni");
-            System.out.println("2. Visualizza dettagli proiezione");
-            System.out.println("3. Torna al menu principale");
+            System.out.println("1. Visualizza film disponibili per giorno");
+            System.out.println("2. Ricerca avanzata proiezioni");
+            System.out.println("3. Visualizza dettagli proiezione");
+            System.out.println("4. Torna al menu principale");
             System.out.print("Scelta: ");
             
             String scelta = scanner.nextLine().trim();
             
             switch (scelta) {
                 case "1":
-                    cercaProiezioni();
+                    cercaProiezioniPerGiorno();
                     break;
                 case "2":
-                    visualizzaDettagliProiezione();
+                    cercaProiezioni();
                     break;
                 case "3":
+                    visualizzaDettagliProiezione();
+                    break;
+                case "4":
                     continuaGuest = false;
                     break;
                 default:
@@ -305,6 +307,62 @@ public class CineMax {
             System.out.println("Registrazione effettuata con successo!");
         } else {
             System.out.println("Username già esistente!");
+        }
+    }
+    
+    /**
+     * Cerca proiezioni disponibili per un giorno specifico
+     * Mostra solo film e orari
+     */
+    private void cercaProiezioniPerGiorno() {
+        System.out.println("\n========== RICERCA FILM PER GIORNO ==========");
+        System.out.print("Inserisci il giorno (yyyy-MM-dd): ");
+        String giornoStr = scanner.nextLine().trim();
+        
+        if (giornoStr.isEmpty()) {
+            System.out.println("Giorno non valido!");
+            return;
+        }
+        
+        try {
+            LocalDate giorno = LocalDate.parse(giornoStr, DATE_FORMATTER);
+            LocalDateTime inizio = giorno.atStartOfDay();
+            LocalDateTime fine = giorno.atTime(23, 59, 59);
+            
+            // Cerco tutte le proiezioni del giorno
+            List<Proiezione> risultati = sistema.cercaProiezioni(
+                null,
+                null,
+                inizio,
+                fine,
+                -1,
+                -1
+            );
+            
+            if (risultati.isEmpty()) {
+                System.out.println("\n❌ Nessun film disponibile per il " + giornoStr);
+            } else {
+                System.out.println("\n✓ Film disponibili il " + giornoStr + ":\n");
+                System.out.println("┌─────────────────────────────────────────────────────────┐");
+                
+                for (Proiezione p : risultati) {
+                    String ora = p.getDataOraProiezione().format(DateTimeFormatter.ofPattern("HH:mm"));
+                    String titolo = p.getFilm().getTitolo();
+                    String genere = p.getFilm().getGenere();
+                    double costo = p.getCostoBiglietto();
+                    int postiLiberi = p.getCapacitaSala() - sistema.calcolaPostiOccupati(p.getId());
+                    
+                    System.out.printf("│ [ID: %d] %s (%s)%n", p.getId(), titolo, genere);
+                    System.out.printf("│ Orario: %s | Costo: %.2f€ | Posti: %d disponibili%n", 
+                        ora, costo, postiLiberi);
+                    System.out.println("│");
+                }
+                
+                System.out.println("└─────────────────────────────────────────────────────────┘");
+                System.out.println("\nDigita l'ID della proiezione per avere più dettagli.");
+            }
+        } catch (Exception e) {
+            System.out.println("Formato data non valido! Usa il formato yyyy-MM-dd");
         }
     }
     
