@@ -1,0 +1,2 @@
+# Formato: usernameCliente;idProiezione;numeroBiglietti
+aerdna;17;1

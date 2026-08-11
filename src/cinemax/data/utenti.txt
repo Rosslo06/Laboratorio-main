@@ -1,8 +1,0 @@
-# Formato: nome;cognome;username;passwordHash;dataNascita;luogo;ruolo
-Marco;Rossi;mrossi;1078694789;1985-05-15;Milano;proiezionista
-Elena;Bianchi;ebianchi;1747585824;1988-08-22;Roma;proiezionista
-Giovanni;Verdi;gverdi;1023892928;1990-03-10;Napoli;bigliettaio
-Francesca;Neri;fneri;558638686;1992-07-18;Torino;bigliettaio
-Andrea;Galli;agalli;1149319664;1995-02-25;Firenze;bigliettaio
-Sara;Ferrari;sferrari;2093631819;1993-11-30;Bologna;bigliettaio
-Luca;Conti;lconti;2074407503;1991-06-12;Genova;bigliettaio

@@ -1,0 +1,8 @@
+# Formato: nome;cognome;username;passwordHash;dataNascita;luogo;ruolo
+Marco;Rossi;mrossi;password123;1985-05-15;Milano;proiezionista
+Elena;Bianchi;ebianchi;password123;1988-08-22;Roma;proiezionista
+Giovanni;Verdi;gverdi;password123;1990-03-10;Napoli;bigliettaio
+Francesca;Neri;fneri;password123;1992-07-18;Torino;bigliettaio
+Andrea;Galli;agalli;password123;1995-02-25;Firenze;bigliettaio
+Sara;Ferrari;sferrari;password123;1993-11-30;Bologna;bigliettaio
+Luca;Conti;lconti;password123;1991-06-12;Genova;bigliettaio

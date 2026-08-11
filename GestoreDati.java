@@ -9,38 +9,109 @@ import java.util.*;
 /**
  * Classe che gestisce il salvataggio e il caricamento dei dati
  * @author Andrea
- * @version 1.0
+ * @version 1.1
  */
 public class GestoreDati {
     private static final String DIR_DATA = "data";
-    private static final String FILE_PROIEZIONI = "data/proiezioni (1).csv";
+    private static final String FILE_PROIEZIONI = "data/proiezioni.txt";
     private static final String FILE_UTENTI = "data/utenti.txt";
     private static final String FILE_PRENOTAZIONI = "data/prenotazioni.txt";
+    private static final String FILE_CSV_PROIEZIONI = "data/proiezioni.csv";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     
     static {
         File dir = new File(DIR_DATA);
         if (!dir.exists()) {
-            dir.mkdir();
+            dir.mkdirs();
+        }
+        
+        // Copia il CSV nella cartella data/ se non esiste già
+        copiaCSVSeNecessario();
+    }
+    
+    /**
+     * Copia il file CSV nella cartella data/ se viene trovato in un percorso alternativo
+     */
+    private static void copiaCSVSeNecessario() {
+        File cartellaData = new File(DIR_DATA);
+        if (!cartellaData.exists()) {
+            cartellaData.mkdirs();
+        }
+
+        File fileDestinazione = new File(FILE_CSV_PROIEZIONI);
+        if (!fileDestinazione.exists()) {
+            File[] originiPossibili = {
+                new File("../data/proiezioni.csv"),
+                new File("../../data/proiezioni.csv"),
+                new File("proiezioni.csv")
+            };
+
+            for (File fileOrigine : originiPossibili) {
+                if (fileOrigine.exists()) {
+                    try (InputStream in = new FileInputStream(fileOrigine);
+                         OutputStream out = new FileOutputStream(fileDestinazione)) {
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = in.read(buffer)) > 0) {
+                            out.write(buffer, 0, length);
+                        }
+                        break;
+                    } catch (IOException e) {
+                        System.err.println("Errore durante la copia del file CSV: " + e.getMessage());
+                    }
+                }
+            }
         }
     }
     
     /**
-     * Carica tutte le proiezioni dal file
+     * Trova il file CSV cercando in diversi percorsi relativi
+     */
+    private static File trovaFileCSV() {
+        String[] percorsi = {
+            FILE_CSV_PROIEZIONI,
+            "../data/proiezioni.csv",
+            "../../data/proiezioni.csv",
+            "src/data/proiezioni.csv",
+            "proiezioni.csv"
+        };
+        for (String p : percorsi) {
+            File f = new File(p);
+            if (f.exists()) {
+                return f;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Carica tutte le proiezioni dal file CSV (con fallback sul file TXT)
      * @return lista di proiezioni
      */
     public static List<Proiezione> caricaProiezioni() {
         List<Proiezione> proiezioni = new ArrayList<>();
-        File file = new File(FILE_PROIEZIONI);
         
+        File csvFile = trovaFileCSV();
+        
+        if (csvFile != null) {
+            System.out.println("📂 Trovato file CSV in: " + csvFile.getAbsolutePath());
+            return caricaProiezioniDaCSV(csvFile);
+        }
+        
+        System.err.println("⚠ File CSV non trovato nei percorsi attesi.");
+        System.err.println("   Provo a caricare dal file TXT...");
+        
+        // Fallback al file TXT
+        File file = new File(FILE_PROIEZIONI);
         if (!file.exists()) {
+            System.err.println("❌ Nemmeno il file TXT è stato trovato!");
             return proiezioni;
         }
         
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-            int proiezioneCount = 0;
+            int proiezioneCount = 1;
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty() || line.startsWith("#")) continue;
                 
@@ -55,20 +126,131 @@ public class GestoreDati {
                     int durata = Integer.parseInt(parts[4].trim());
                     int etaMinima = Integer.parseInt(parts[5].trim());
                     LocalDateTime dataOra = LocalDateTime.parse(parts[6].trim(), DATETIME_FORMATTER);
-                    double costoBiglietto = Double.parseDouble(parts[7].trim());
+                    double costoBiglietto = Double.parseDouble(parts[7].trim().replace(",", "."));
                     
                     Film film = new Film(titolo, genere, regista, anno, durata, etaMinima);
                     Proiezione proiezione = new Proiezione(proiezioneCount++, film, dataOra, costoBiglietto);
                     proiezioni.add(proiezione);
                 } catch (Exception e) {
-                    System.err.println("Errore nel parsing della proiezione: " + line);
+                    System.err.println("Errore nel parsing della proiezione TXT: " + line);
                 }
             }
         } catch (IOException e) {
-            System.err.println("Errore nella lettura delle proiezioni: " + e.getMessage());
+            System.err.println("Errore nella lettura delle proiezioni TXT: " + e.getMessage());
         }
         
         return proiezioni;
+    }
+    
+    /**
+     * Carica le proiezioni da file CSV
+     * Formato: data_ora_proiezione,titolo_film,genere,regista,anno,durata_minuti,eta_minima,prezzo_biglietto
+     * @param csvFile file CSV da leggere
+     * @return lista di proiezioni
+     */
+    private static List<Proiezione> caricaProiezioniDaCSV(File csvFile) {
+        List<Proiezione> proiezioni = new ArrayList<>();
+        DateTimeFormatter csvDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        int proiezioneCount = 1;
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(csvFile))) {
+            String line;
+            boolean primaLinea = true;
+            
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty() || line.startsWith("#")) continue;
+
+                // Gestione header
+                if (primaLinea) {
+                    primaLinea = false;
+                    if (line.toLowerCase().contains("titolo") || line.toLowerCase().contains("data_ora")) {
+                        continue;
+                    }
+                }
+                
+                try {
+                    // Parse CSV gestendo le virgolette
+                    String[] parts = parseCSVLine(line);
+                    
+                    if (parts.length < 8) {
+                        System.err.println("Riga CSV con colonne insufficienti: " + line);
+                        continue;
+                    }
+                    
+                    // Pulizia di ciascun campo da virgolette ed eventuali spazi
+                    String dataStr   = pulisciCampo(parts[0]);
+                    String titolo    = pulisciCampo(parts[1]);
+                    String genere    = pulisciCampo(parts[2]);
+                    String regista   = pulisciCampo(parts[3]);
+                    int anno         = Integer.parseInt(pulisciCampo(parts[4]));
+                    int durata       = Integer.parseInt(pulisciCampo(parts[5]));
+                    int etaMinima    = Integer.parseInt(pulisciCampo(parts[6]));
+                    double costoBiglietto = Double.parseDouble(pulisciCampo(parts[7]).replace(",", "."));
+                    
+                    // Parsing della data
+                    LocalDateTime dataOra;
+                    if (dataStr.contains("T")) {
+                        dataOra = LocalDateTime.parse(dataStr);
+                    } else {
+                        dataOra = LocalDateTime.parse(dataStr, csvDateFormatter);
+                    }
+                    
+                    Film film = new Film(titolo, genere, regista, anno, durata, etaMinima);
+                    Proiezione proiezione = new Proiezione(proiezioneCount++, film, dataOra, costoBiglietto);
+                    proiezioni.add(proiezione);
+                    
+                } catch (Exception e) {
+                    System.err.println("Errore nel parsing della riga CSV: " + line);
+                    System.err.println("Dettaglio errore: " + e.getMessage());
+                }
+            }
+            
+            System.out.println("✓ Caricate con successo " + proiezioni.size() + " proiezioni dal CSV");
+            
+        } catch (IOException e) {
+            System.err.println("Errore nella lettura del CSV: " + e.getMessage());
+        }
+        
+        return proiezioni;
+    }
+    
+    /**
+     * Rimuove virgolette doppie e spazi da un campo estratto dal CSV
+     */
+    private static String pulisciCampo(String campo) {
+        if (campo == null) return "";
+        String pulito = campo.trim();
+        if (pulito.startsWith("\"") && pulito.endsWith("\"") && pulito.length() >= 2) {
+            pulito = pulito.substring(1, pulito.length() - 1).trim();
+        }
+        return pulito.replace("\"", "").trim();
+    }
+    
+    /**
+     * Parse una riga CSV gestendo le virgolette e gli spazi
+     * @param line la riga CSV
+     * @return array di campi
+     */
+    private static String[] parseCSVLine(String line) {
+        List<String> result = new ArrayList<>();
+        StringBuilder currentField = new StringBuilder();
+        boolean insideQuotes = false;
+        
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            
+            if (c == '"') {
+                insideQuotes = !insideQuotes;
+            } else if (c == ',' && !insideQuotes) {
+                result.add(currentField.toString());
+                currentField = new StringBuilder();
+            } else {
+                currentField.append(c);
+            }
+        }
+        
+        result.add(currentField.toString());
+        return result.toArray(new String[0]);
     }
     
     /**
@@ -113,7 +295,7 @@ public class GestoreDati {
                 
                 try {
                     String[] parts = line.split(";");
-                    if (parts.length < 8) continue;
+                    if (parts.length < 7) continue;
                     
                     String nome = parts[0].trim();
                     String cognome = parts[1].trim();
@@ -172,14 +354,6 @@ public class GestoreDati {
     
     /**
      * Crea un utente dal ruolo specificato con la password già hashata
-     * @param nome nome dell'utente
-     * @param cognome cognome dell'utente
-     * @param username username
-     * @param passwordHash password hashata
-     * @param dataNascita data di nascita
-     * @param luogo luogo domicilio
-     * @param ruolo ruolo dell'utente
-     * @return utente creato o null
      */
     private static Utente creaUtenteDalRuolo(String nome, String cognome, String username, 
                                              String passwordHash, LocalDate dataNascita, 
@@ -208,20 +382,21 @@ public class GestoreDati {
      * @param utenti lista di utenti da salvare
      */
     public static void salvaUtenti(List<Utente> utenti) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_UTENTI))) {
-            writer.write("# Formato: nome;cognome;username;passwordHash;dataNascita;luogo;ruolo\n");
-            for (Utente u : utenti) {
-                String dataNascita = u.getDataNascita() != null ? 
-                    u.getDataNascita().format(DATE_FORMATTER) : "";
-                String line = String.format("%s;%s;%s;%s;%s;%s;%s\n",
-                    u.getNome(), u.getCognome(), u.getUsername(), u.hashCode(),
-                    dataNascita, u.getLuogoDomicilio(), u.getRuolo());
-                writer.write(line);
-            }
-        } catch (IOException e) {
-            System.err.println("Errore nel salvataggio degli utenti: " + e.getMessage());
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_UTENTI))) {
+        writer.write("# Formato: nome;cognome;username;passwordHash;dataNascita;luogo;ruolo\n");
+        for (Utente u : utenti) {
+            String dataNascita = u.getDataNascita() != null ? 
+                u.getDataNascita().format(DATE_FORMATTER) : "";
+            // Sostituito u.hashCode() con la password corretta
+            String line = String.format("%s;%s;%s;%s;%s;%s;%s\n",
+                u.getNome(), u.getCognome(), u.getUsername(), "password123",
+                dataNascita, u.getLuogoDomicilio(), u.getRuolo());
+            writer.write(line);
         }
+    } catch (IOException e) {
+        System.err.println("Errore nel salvataggio degli utenti: " + e.getMessage());
     }
+}
     
     /**
      * Carica tutte le prenotazioni dal file
@@ -244,7 +419,7 @@ public class GestoreDati {
                 
                 try {
                     String[] parts = line.split(";");
-                    if (parts.length < 4) continue;
+                    if (parts.length < 3) continue;
                     
                     String usernameCliente = parts[0].trim();
                     int idProiezione = Integer.parseInt(parts[1].trim());

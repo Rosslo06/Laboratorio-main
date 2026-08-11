@@ -1,3 +1,5 @@
+
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -137,37 +139,41 @@ public class CineMax {
         
         while (continuaCliente) {
             System.out.println("\n========== MENU CLIENTE ==========");
-            System.out.println("1. Cerca proiezioni");
-            System.out.println("2. Visualizza dettagli proiezione");
-            System.out.println("3. Le mie prenotazioni");
-            System.out.println("4. Crea nuova prenotazione");
-            System.out.println("5. Modifica prenotazione");
-            System.out.println("6. Cancella prenotazione");
-            System.out.println("7. Logout");
+            System.out.println("1. Visualizza film disponibili per giorno");
+            System.out.println("2. Ricerca avanzata proiezioni");
+            System.out.println("3. Visualizza dettagli proiezione");
+            System.out.println("4. Le mie prenotazioni");
+            System.out.println("5. Crea nuova prenotazione");
+            System.out.println("6. Modifica prenotazione");
+            System.out.println("7. Cancella prenotazione");
+            System.out.println("8. Logout");
             System.out.print("Scelta: ");
             
             String scelta = scanner.nextLine().trim();
             
             switch (scelta) {
                 case "1":
-                    cercaProiezioni();
+                    cercaProiezioniPerGiorno();
                     break;
                 case "2":
-                    visualizzaDettagliProiezione();
+                    cercaProiezioni();
                     break;
                 case "3":
-                    visualizzaPrenotazioniCliente();
+                    visualizzaDettagliProiezione();
                     break;
                 case "4":
-                    creaPrenotazione();
+                    visualizzaPrenotazioniCliente();
                     break;
                 case "5":
-                    modificaPrenotazione();
+                    creaPrenotazione();
                     break;
                 case "6":
-                    cancellaPrenotazione();
+                    modificaPrenotazione();
                     break;
                 case "7":
+                    cancellaPrenotazione();
+                    break;
+                case "8":
                     sistema.logout();
                     return true;
                 default:
@@ -187,29 +193,33 @@ public class CineMax {
         
         while (continua) {
             System.out.println("\n========== MENU PROIEZIONISTA ==========");
-            System.out.println("1. Aggiungi proiezione");
-            System.out.println("2. Modifica proiezione");
-            System.out.println("3. Elimina proiezione");
-            System.out.println("4. Visualizza tutte le proiezioni");
-            System.out.println("5. Logout");
+            System.out.println("1. Visualizza film disponibili per giorno");
+            System.out.println("2. Aggiungi proiezione");
+            System.out.println("3. Modifica proiezione");
+            System.out.println("4. Elimina proiezione");
+            System.out.println("5. Visualizza tutte le proiezioni");
+            System.out.println("6. Logout");
             System.out.print("Scelta: ");
             
             String scelta = scanner.nextLine().trim();
             
             switch (scelta) {
                 case "1":
-                    aggiungiProiezione();
+                    cercaProiezioniPerGiorno();
                     break;
                 case "2":
-                    modificaProiezione();
+                    aggiungiProiezione();
                     break;
                 case "3":
-                    eliminaProiezione();
+                    modificaProiezione();
                     break;
                 case "4":
-                    visualizzaTutteProiezioni();
+                    eliminaProiezione();
                     break;
                 case "5":
+                    visualizzaTutteProiezioni();
+                    break;
+                case "6":
                     sistema.logout();
                     return true;
                 default:
@@ -229,21 +239,25 @@ public class CineMax {
         
         while (continua) {
             System.out.println("\n========== MENU BIGLIETTAIO ==========");
-            System.out.println("1. Visualizza prenotazioni di oggi");
-            System.out.println("2. Cerca prenotazione");
-            System.out.println("3. Logout");
+            System.out.println("1. Visualizza film disponibili per giorno");
+            System.out.println("2. Visualizza prenotazioni di oggi");
+            System.out.println("3. Cerca prenotazione");
+            System.out.println("4. Logout");
             System.out.print("Scelta: ");
             
             String scelta = scanner.nextLine().trim();
             
             switch (scelta) {
                 case "1":
-                    visualizzaPrenotazioniOggi();
+                    cercaProiezioniPerGiorno();
                     break;
                 case "2":
-                    cercaPrenotazione();
+                    visualizzaPrenotazioniOggi();
                     break;
                 case "3":
+                    cercaPrenotazione();
+                    break;
+                case "4":
                     sistema.logout();
                     return true;
                 default:
@@ -329,6 +343,9 @@ public class CineMax {
             LocalDateTime inizio = giorno.atStartOfDay();
             LocalDateTime fine = giorno.atTime(23, 59, 59);
             
+            System.out.println("\n📊 Debug: Totale proiezioni caricate = " + sistema.getProiezioni().size());
+            System.out.println("   Cerco tra " + inizio + " e " + fine);
+            
             // Cerco tutte le proiezioni del giorno
             List<Proiezione> risultati = sistema.cercaProiezioni(
                 null,
@@ -339,8 +356,11 @@ public class CineMax {
                 -1
             );
             
+            System.out.println("   Risultati trovati: " + risultati.size());
+            
             if (risultati.isEmpty()) {
                 System.out.println("\n❌ Nessun film disponibile per il " + giornoStr);
+                System.out.println("💡 Suggerimento: Prova con una data tra 2018 e 2027");
             } else {
                 System.out.println("\n✓ Film disponibili il " + giornoStr + ":\n");
                 System.out.println("┌─────────────────────────────────────────────────────────┐");
@@ -363,6 +383,7 @@ public class CineMax {
             }
         } catch (Exception e) {
             System.out.println("Formato data non valido! Usa il formato yyyy-MM-dd");
+            System.out.println("Errore: " + e.getMessage());
         }
     }
     
