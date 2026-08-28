@@ -1,9 +1,8 @@
-
-
 import java.time.LocalDate;
 
 /**
  * Classe che rappresenta un proiezionista nel sistema CineMax
+ * Un proiezionista aggiunge e gestisce le proiezioni
  * @author Andrea
  * @version 1.0
  */
@@ -12,22 +11,12 @@ public class Proiezionista extends Utente {
     
     /**
      * Costruttore per la creazione di un proiezionista
-     * @param nome il nome del proiezionista
-     * @param cognome il cognome del proiezionista
-     * @param username l'username del proiezionista
-     * @param password la password del proiezionista
-     * @param dataNascita la data di nascita
-     * @param luogoDomicilio il luogo del domicilio
      */
     public Proiezionista(String nome, String cognome, String username, String password,
                         LocalDate dataNascita, String luogoDomicilio) {
         super(nome, cognome, username, password, dataNascita, luogoDomicilio, "proiezionista");
     }
     
-    /**
-     * Restituisce la rappresentazione in stringa del proiezionista
-     * @return stringa con informazioni del proiezionista
-     */
     @Override
     public String toString() {
         return "Proiezionista{" +

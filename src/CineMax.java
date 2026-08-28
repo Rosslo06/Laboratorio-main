@@ -1,5 +1,3 @@
-
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -8,7 +6,7 @@ import java.util.Scanner;
 
 /**
  * Classe principale dell'applicazione CineMax
- * Gestisce l'interfaccia utente terminale (TUI)
+ * Gestisce l'interfaccia utente da terminale
  * @author Andrea
  * @version 1.0
  */
@@ -18,6 +16,9 @@ public class CineMax {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     
+    /**
+     * Costruttore
+     */
     public CineMax() {
         this.sistema = new Sistema();
         this.scanner = new Scanner(System.in);
@@ -43,7 +44,6 @@ public class CineMax {
     
     /**
      * Menu principale prima del login
-     * @return false per uscire
      */
     private boolean menuPrincipale() {
         System.out.println("\n========== CINEMAX - SISTEMA DI PRENOTAZIONE ==========");
@@ -55,20 +55,16 @@ public class CineMax {
         
         String scelta = scanner.nextLine().trim();
         
-        switch (scelta) {
-            case "1":
-                login();
-                break;
-            case "2":
-                registrazione();
-                break;
-            case "3":
-                menuGuest();
-                break;
-            case "4":
-                return false;
-            default:
-                System.out.println("Scelta non valida!");
+        if (scelta.equals("1")) {
+            login();
+        } else if (scelta.equals("2")) {
+            registrazione();
+        } else if (scelta.equals("3")) {
+            menuGuest();
+        } else if (scelta.equals("4")) {
+            return false;
+        } else {
+            System.out.println("Scelta non valida!");
         }
         
         return true;
@@ -76,7 +72,6 @@ public class CineMax {
     
     /**
      * Menu principale dopo il login
-     * @return false per uscire
      */
     private boolean menuPrincipalePosLogin() {
         String ruolo = sistema.getUtenteCorrente().getRuolo();
@@ -96,54 +91,48 @@ public class CineMax {
     }
     
     /**
-     * Menu per i guest (accesso senza login)
+     * Menu per i guest
      */
     private void menuGuest() {
-        boolean continuaGuest = true;
+        boolean continua = true;
         
-        while (continuaGuest) {
+        while (continua) {
             System.out.println("\n========== MENU GUEST ==========");
-            System.out.println("1. Visualizza film disponibili per giorno");
-            System.out.println("2. Ricerca avanzata proiezioni");
-            System.out.println("3. Visualizza dettagli proiezione");
-            System.out.println("4. Torna al menu principale");
+            System.out.println("1. Visualizza film per giorno");
+            System.out.println("2. Ricerca avanzata");
+            System.out.println("3. Dettagli proiezione");
+            System.out.println("4. Torna indietro");
             System.out.print("Scelta: ");
             
             String scelta = scanner.nextLine().trim();
             
-            switch (scelta) {
-                case "1":
-                    cercaProiezioniPerGiorno();
-                    break;
-                case "2":
-                    cercaProiezioni();
-                    break;
-                case "3":
-                    visualizzaDettagliProiezione();
-                    break;
-                case "4":
-                    continuaGuest = false;
-                    break;
-                default:
-                    System.out.println("Scelta non valida!");
+            if (scelta.equals("1")) {
+                cercaProiezioniPerGiorno();
+            } else if (scelta.equals("2")) {
+                cercaProiezioni();
+            } else if (scelta.equals("3")) {
+                visualizzaDettagliProiezione();
+            } else if (scelta.equals("4")) {
+                continua = false;
+            } else {
+                System.out.println("Scelta non valida!");
             }
         }
     }
     
     /**
      * Menu per i clienti
-     * @return false per logout
      */
     private boolean menuCliente() {
-        boolean continuaCliente = true;
+        boolean continua = true;
         
-        while (continuaCliente) {
+        while (continua) {
             System.out.println("\n========== MENU CLIENTE ==========");
-            System.out.println("1. Visualizza film disponibili per giorno");
-            System.out.println("2. Ricerca avanzata proiezioni");
-            System.out.println("3. Visualizza dettagli proiezione");
+            System.out.println("1. Visualizza film per giorno");
+            System.out.println("2. Ricerca avanzata");
+            System.out.println("3. Dettagli proiezione");
             System.out.println("4. Le mie prenotazioni");
-            System.out.println("5. Crea nuova prenotazione");
+            System.out.println("5. Crea prenotazione");
             System.out.println("6. Modifica prenotazione");
             System.out.println("7. Cancella prenotazione");
             System.out.println("8. Logout");
@@ -151,33 +140,25 @@ public class CineMax {
             
             String scelta = scanner.nextLine().trim();
             
-            switch (scelta) {
-                case "1":
-                    cercaProiezioniPerGiorno();
-                    break;
-                case "2":
-                    cercaProiezioni();
-                    break;
-                case "3":
-                    visualizzaDettagliProiezione();
-                    break;
-                case "4":
-                    visualizzaPrenotazioniCliente();
-                    break;
-                case "5":
-                    creaPrenotazione();
-                    break;
-                case "6":
-                    modificaPrenotazione();
-                    break;
-                case "7":
-                    cancellaPrenotazione();
-                    break;
-                case "8":
-                    sistema.logout();
-                    return true;
-                default:
-                    System.out.println("Scelta non valida!");
+            if (scelta.equals("1")) {
+                cercaProiezioniPerGiorno();
+            } else if (scelta.equals("2")) {
+                cercaProiezioni();
+            } else if (scelta.equals("3")) {
+                visualizzaDettagliProiezione();
+            } else if (scelta.equals("4")) {
+                visualizzaPrenotazioniCliente();
+            } else if (scelta.equals("5")) {
+                creaPrenotazione();
+            } else if (scelta.equals("6")) {
+                modificaPrenotazione();
+            } else if (scelta.equals("7")) {
+                cancellaPrenotazione();
+            } else if (scelta.equals("8")) {
+                sistema.logout();
+                return true;
+            } else {
+                System.out.println("Scelta non valida!");
             }
         }
         
@@ -186,14 +167,13 @@ public class CineMax {
     
     /**
      * Menu per i proiezionisti
-     * @return false per logout
      */
     private boolean menuProiezionista() {
         boolean continua = true;
         
         while (continua) {
             System.out.println("\n========== MENU PROIEZIONISTA ==========");
-            System.out.println("1. Visualizza film disponibili per giorno");
+            System.out.println("1. Visualizza film per giorno");
             System.out.println("2. Aggiungi proiezione");
             System.out.println("3. Modifica proiezione");
             System.out.println("4. Elimina proiezione");
@@ -203,27 +183,21 @@ public class CineMax {
             
             String scelta = scanner.nextLine().trim();
             
-            switch (scelta) {
-                case "1":
-                    cercaProiezioniPerGiorno();
-                    break;
-                case "2":
-                    aggiungiProiezione();
-                    break;
-                case "3":
-                    modificaProiezione();
-                    break;
-                case "4":
-                    eliminaProiezione();
-                    break;
-                case "5":
-                    visualizzaTutteProiezioni();
-                    break;
-                case "6":
-                    sistema.logout();
-                    return true;
-                default:
-                    System.out.println("Scelta non valida!");
+            if (scelta.equals("1")) {
+                cercaProiezioniPerGiorno();
+            } else if (scelta.equals("2")) {
+                aggiungiProiezione();
+            } else if (scelta.equals("3")) {
+                modificaProiezione();
+            } else if (scelta.equals("4")) {
+                eliminaProiezione();
+            } else if (scelta.equals("5")) {
+                visualizzaTutteProiezioni();
+            } else if (scelta.equals("6")) {
+                sistema.logout();
+                return true;
+            } else {
+                System.out.println("Scelta non valida!");
             }
         }
         
@@ -232,41 +206,38 @@ public class CineMax {
     
     /**
      * Menu per i bigliettai
-     * @return false per logout
      */
     private boolean menuBigliettaio() {
         boolean continua = true;
         
         while (continua) {
             System.out.println("\n========== MENU BIGLIETTAIO ==========");
-            System.out.println("1. Visualizza film disponibili per giorno");
-            System.out.println("2. Visualizza prenotazioni di oggi");
+            System.out.println("1. Visualizza film per giorno");
+            System.out.println("2. Prenotazioni di oggi");
             System.out.println("3. Cerca prenotazione");
             System.out.println("4. Logout");
             System.out.print("Scelta: ");
             
             String scelta = scanner.nextLine().trim();
             
-            switch (scelta) {
-                case "1":
-                    cercaProiezioniPerGiorno();
-                    break;
-                case "2":
-                    visualizzaPrenotazioniOggi();
-                    break;
-                case "3":
-                    cercaPrenotazione();
-                    break;
-                case "4":
-                    sistema.logout();
-                    return true;
-                default:
-                    System.out.println("Scelta non valida!");
+            if (scelta.equals("1")) {
+                cercaProiezioniPerGiorno();
+            } else if (scelta.equals("2")) {
+                visualizzaPrenotazioniOggi();
+            } else if (scelta.equals("3")) {
+                cercaPrenotazione();
+            } else if (scelta.equals("4")) {
+                sistema.logout();
+                return true;
+            } else {
+                System.out.println("Scelta non valida!");
             }
         }
         
         return true;
     }
+    
+    // ============ METODI DI LOGIN ============
     
     /**
      * Effettua il login
@@ -287,7 +258,7 @@ public class CineMax {
     }
     
     /**
-     * Effettua la registrazione
+     * Registra un nuovo cliente
      */
     private void registrazione() {
         System.out.println("\n========== REGISTRAZIONE ==========");
@@ -303,7 +274,7 @@ public class CineMax {
         System.out.print("Password: ");
         String password = scanner.nextLine().trim();
         
-        System.out.print("Data di nascita (yyyy-MM-dd) [opzionale, premi Invio]: ");
+        System.out.print("Data di nascita (yyyy-MM-dd) [opzionale]: ");
         String dataStr = scanner.nextLine().trim();
         LocalDate dataNascita = null;
         if (!dataStr.isEmpty()) {
@@ -324,9 +295,10 @@ public class CineMax {
         }
     }
     
+    // ============ METODI DI RICERCA ============
+    
     /**
-     * Cerca proiezioni disponibili per un giorno specifico
-     * Mostra solo film e orari
+     * Cerca proiezioni per giorno
      */
     private void cercaProiezioniPerGiorno() {
         System.out.println("\n========== RICERCA FILM PER GIORNO ==========");
@@ -343,10 +315,6 @@ public class CineMax {
             LocalDateTime inizio = giorno.atStartOfDay();
             LocalDateTime fine = giorno.atTime(23, 59, 59);
             
-            System.out.println("\n📊 Debug: Totale proiezioni caricate = " + sistema.getProiezioni().size());
-            System.out.println("   Cerco tra " + inizio + " e " + fine);
-            
-            // Cerco tutte le proiezioni del giorno
             List<Proiezione> risultati = sistema.cercaProiezioni(
                 null,
                 null,
@@ -356,14 +324,10 @@ public class CineMax {
                 -1
             );
             
-            System.out.println("   Risultati trovati: " + risultati.size());
-            
             if (risultati.isEmpty()) {
-                System.out.println("\n❌ Nessun film disponibile per il " + giornoStr);
-                System.out.println("💡 Suggerimento: Prova con una data tra 2018 e 2027");
+                System.out.println("Nessun film disponibile per il " + giornoStr);
             } else {
-                System.out.println("\n✓ Film disponibili il " + giornoStr + ":\n");
-                System.out.println("┌─────────────────────────────────────────────────────────┐");
+                System.out.println("\nFilm disponibili il " + giornoStr + ":\n");
                 
                 for (Proiezione p : risultati) {
                     String ora = p.getDataOraProiezione().format(DateTimeFormatter.ofPattern("HH:mm"));
@@ -372,23 +336,17 @@ public class CineMax {
                     double costo = p.getCostoBiglietto();
                     int postiLiberi = p.getCapacitaSala() - sistema.calcolaPostiOccupati(p.getId());
                     
-                    System.out.printf("│ [ID: %d] %s (%s)%n", p.getId(), titolo, genere);
-                    System.out.printf("│ Orario: %s | Costo: %.2f€ | Posti: %d disponibili%n", 
-                        ora, costo, postiLiberi);
-                    System.out.println("│");
+                    System.out.println("[ID: " + p.getId() + "] " + titolo + " (" + genere + ")");
+                    System.out.println("  Orario: " + ora + " | Costo: " + costo + "€ | Posti: " + postiLiberi);
                 }
-                
-                System.out.println("└─────────────────────────────────────────────────────────┘");
-                System.out.println("\nDigita l'ID della proiezione per avere più dettagli.");
             }
         } catch (Exception e) {
-            System.out.println("Formato data non valido! Usa il formato yyyy-MM-dd");
-            System.out.println("Errore: " + e.getMessage());
+            System.out.println("Formato data non valido!");
         }
     }
     
     /**
-     * Cerca proiezioni
+     * Ricerca avanzata proiezioni
      */
     private void cercaProiezioni() {
         System.out.println("\n========== RICERCA PROIEZIONI ==========");
@@ -420,54 +378,30 @@ public class CineMax {
             }
         }
         
-        System.out.print("Costo minimo € [opzionale]: ");
-        double costoMin = -1;
-        try {
-            String costoMinStr = scanner.nextLine().trim();
-            if (!costoMinStr.isEmpty()) {
-                costoMin = Double.parseDouble(costoMinStr);
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Formato non valido!");
-        }
-        
-        System.out.print("Costo massimo € [opzionale]: ");
-        double costoMax = -1;
-        try {
-            String costoMaxStr = scanner.nextLine().trim();
-            if (!costoMaxStr.isEmpty()) {
-                costoMax = Double.parseDouble(costoMaxStr);
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Formato non valido!");
-        }
-        
         List<Proiezione> risultati = sistema.cercaProiezioni(
             titolo.isEmpty() ? null : titolo,
             genere.isEmpty() ? null : genere,
             dataInizio,
             dataFine,
-            costoMin,
-            costoMax
+            -1,
+            -1
         );
         
         if (risultati.isEmpty()) {
             System.out.println("Nessuna proiezione trovata!");
         } else {
-            System.out.println("\nProiezioni trovate:");
-            for (int i = 0; i < risultati.size(); i++) {
-                Proiezione p = risultati.get(i);
-                System.out.printf("\n[%d] ID: %d\n", i, p.getId());
-                System.out.println("    Film: " + p.getFilm().getTitolo());
-                System.out.println("    Data/Ora: " + p.getDataOraProiezione().format(DATETIME_FORMATTER));
-                System.out.printf("    Costo: %.2f€\n", p.getCostoBiglietto());
-                System.out.println("    Posti disponibili: " + (p.getCapacitaSala() - sistema.calcolaPostiOccupati(p.getId())));
+            System.out.println("\nProiezioni trovate: " + risultati.size() + "\n");
+            for (Proiezione p : risultati) {
+                System.out.println("[ID: " + p.getId() + "] " + p.getFilm().getTitolo());
+                System.out.println("  Data: " + p.getDataOraProiezione().format(DATETIME_FORMATTER));
+                System.out.println("  Costo: " + p.getCostoBiglietto() + "€");
+                System.out.println("  Posti liberi: " + (p.getCapacitaSala() - sistema.calcolaPostiOccupati(p.getId())));
             }
         }
     }
     
     /**
-     * Visualizza dettagli di una proiezione
+     * Visualizza i dettagli di una proiezione
      */
     private void visualizzaDettagliProiezione() {
         System.out.print("ID Proiezione: ");
@@ -488,8 +422,8 @@ public class CineMax {
             System.out.println("Durata: " + p.getFilm().getDurata() + " minuti");
             System.out.println("Età minima: " + p.getFilm().getEtaMinimaPubblico() + " anni");
             System.out.println("Data/Ora: " + p.getDataOraProiezione().format(DATETIME_FORMATTER));
-            System.out.printf("Costo biglietto: %.2f€\n", p.getCostoBiglietto());
-            System.out.println("Posti liberi: " + (p.getCapacitaSala() - sistema.calcolaPostiOccupati(p.getId())) + "/" + p.getCapacitaSala());
+            System.out.println("Costo biglietto: " + p.getCostoBiglietto() + "€");
+            System.out.println("Posti liberi: " + (p.getCapacitaSala() - sistema.calcolaPostiOccupati(p.getId())));
         } catch (NumberFormatException e) {
             System.out.println("ID non valido!");
         }
@@ -508,12 +442,14 @@ public class CineMax {
         
         System.out.println("\n========== TUTTE LE PROIEZIONI ==========");
         for (Proiezione p : proiezioni) {
-            System.out.printf("\nID: %d\n", p.getId());
+            System.out.println("\nID: " + p.getId());
             System.out.println("Film: " + p.getFilm().getTitolo());
             System.out.println("Data/Ora: " + p.getDataOraProiezione().format(DATETIME_FORMATTER));
-            System.out.printf("Costo: %.2f€\n", p.getCostoBiglietto());
+            System.out.println("Costo: " + p.getCostoBiglietto() + "€");
         }
     }
+    
+    // ============ METODI PER PRENOTAZIONI ============
     
     /**
      * Crea una nuova prenotazione
@@ -531,9 +467,9 @@ public class CineMax {
             if (prenotazione != null) {
                 System.out.println("\nPrenotazione effettuata con successo!");
                 System.out.println("Codice prenotazione: " + prenotazione.getCodicePrenotazione());
-                System.out.printf("Costo totale: %.2f€\n", prenotazione.getCostoTotale());
+                System.out.println("Costo totale: " + prenotazione.getCostoTotale() + "€");
             } else {
-                System.out.println("Prenotazione non riuscita! Controlla i dati inseriti.");
+                System.out.println("Prenotazione non riuscita!");
             }
         } catch (NumberFormatException e) {
             System.out.println("Dati non validi!");
@@ -553,11 +489,11 @@ public class CineMax {
         
         System.out.println("\n========== LE MIE PRENOTAZIONI ==========");
         for (Prenotazione p : prenotazioni) {
-            System.out.printf("\nCodice: %s\n", p.getCodicePrenotazione());
+            System.out.println("\nCodice: " + p.getCodicePrenotazione());
             System.out.println("Film: " + p.getProiezione().getFilm().getTitolo());
             System.out.println("Data/Ora: " + p.getProiezione().getDataOraProiezione().format(DATETIME_FORMATTER));
             System.out.println("Biglietti: " + p.getNumeroBiglietti());
-            System.out.printf("Costo totale: %.2f€\n", p.getCostoTotale());
+            System.out.println("Costo totale: " + p.getCostoTotale() + "€");
         }
     }
     
@@ -575,7 +511,7 @@ public class CineMax {
             if (sistema.modificaPrenotazione(codice, nuovoId)) {
                 System.out.println("Prenotazione modificata con successo!");
             } else {
-                System.out.println("Modifica non riuscita! Controlla i dati.");
+                System.out.println("Modifica non riuscita!");
             }
         } catch (NumberFormatException e) {
             System.out.println("ID non valido!");
@@ -597,7 +533,72 @@ public class CineMax {
     }
     
     /**
-     * Aggiunge una nuova proiezione (proiezionista)
+     * Visualizza prenotazioni di oggi
+     */
+    private void visualizzaPrenotazioniOggi() {
+        List<Prenotazione> prenotazioni = sistema.getPrenotazioniOggi();
+        
+        if (prenotazioni.isEmpty()) {
+            System.out.println("Nessuna prenotazione per oggi!");
+            return;
+        }
+        
+        System.out.println("\n========== PRENOTAZIONI DI OGGI ==========");
+        for (Prenotazione p : prenotazioni) {
+            System.out.println("\nCodice: " + p.getCodicePrenotazione());
+            System.out.println("Cliente: " + p.getCliente().getNome() + " " + p.getCliente().getCognome());
+            System.out.println("Film: " + p.getProiezione().getFilm().getTitolo());
+            System.out.println("Biglietti: " + p.getNumeroBiglietti());
+            System.out.println("Costo totale: " + p.getCostoTotale() + "€");
+        }
+    }
+    
+    /**
+     * Cerca una prenotazione
+     */
+    private void cercaPrenotazione() {
+        System.out.println("\n========== RICERCA PRENOTAZIONE ==========");
+        
+        System.out.print("Codice [opzionale]: ");
+        String codice = scanner.nextLine().trim();
+        
+        System.out.print("Nome cliente [opzionale]: ");
+        String nome = scanner.nextLine().trim();
+        
+        System.out.print("Cognome cliente [opzionale]: ");
+        String cognome = scanner.nextLine().trim();
+        
+        System.out.print("Titolo film [opzionale]: ");
+        String titolo = scanner.nextLine().trim();
+        
+        List<Prenotazione> risultati = sistema.cercaPrenotazioni(
+            codice.isEmpty() ? null : codice,
+            nome.isEmpty() ? null : nome,
+            cognome.isEmpty() ? null : cognome,
+            titolo.isEmpty() ? null : titolo,
+            null,
+            null
+        );
+        
+        if (risultati.isEmpty()) {
+            System.out.println("Nessuna prenotazione trovata!");
+        } else {
+            System.out.println("\nPrenotazioni trovate: " + risultati.size() + "\n");
+            for (Prenotazione p : risultati) {
+                System.out.println("Codice: " + p.getCodicePrenotazione());
+                System.out.println("Cliente: " + p.getCliente().getNome() + " " + p.getCliente().getCognome());
+                System.out.println("Film: " + p.getProiezione().getFilm().getTitolo());
+                System.out.println("Data: " + p.getProiezione().getDataOraProiezione().format(DATETIME_FORMATTER));
+                System.out.println("Biglietti: " + p.getNumeroBiglietti());
+                System.out.println("Costo: " + p.getCostoTotale() + "€\n");
+            }
+        }
+    }
+    
+    // ============ METODI PER PROIEZIONI (PROIEZIONISTA) ============
+    
+    /**
+     * Aggiunge una nuova proiezione
      */
     private void aggiungiProiezione() {
         System.out.println("\n========== AGGIUNGI PROIEZIONE ==========");
@@ -631,12 +632,12 @@ public class CineMax {
         if (sistema.aggiungiProiezione(film, dataOra, costo)) {
             System.out.println("Proiezione aggiunta con successo!");
         } else {
-            System.out.println("Proiezione non aggiunta! Verifica i dati.");
+            System.out.println("Proiezione non aggiunta!");
         }
     }
     
     /**
-     * Modifica una proiezione (proiezionista)
+     * Modifica una proiezione
      */
     private void modificaProiezione() {
         System.out.print("ID Proiezione: ");
@@ -653,7 +654,7 @@ public class CineMax {
     }
     
     /**
-     * Elimina una proiezione (proiezionista)
+     * Elimina una proiezione
      */
     private void eliminaProiezione() {
         System.out.print("ID Proiezione: ");
@@ -663,69 +664,6 @@ public class CineMax {
             System.out.println("Proiezione eliminata con successo!");
         } else {
             System.out.println("Eliminazione non riuscita!");
-        }
-    }
-    
-    /**
-     * Visualizza prenotazioni di oggi (bigliettaio)
-     */
-    private void visualizzaPrenotazioniOggi() {
-        List<Prenotazione> prenotazioni = sistema.getPrenotazioniOggi();
-        
-        if (prenotazioni.isEmpty()) {
-            System.out.println("Nessuna prenotazione per oggi!");
-            return;
-        }
-        
-        System.out.println("\n========== PRENOTAZIONI DI OGGI ==========");
-        for (Prenotazione p : prenotazioni) {
-            System.out.printf("\nCodice: %s\n", p.getCodicePrenotazione());
-            System.out.println("Cliente: " + p.getCliente().getNome() + " " + p.getCliente().getCognome());
-            System.out.println("Film: " + p.getProiezione().getFilm().getTitolo());
-            System.out.println("Biglietti: " + p.getNumeroBiglietti());
-            System.out.printf("Costo totale: %.2f€\n", p.getCostoTotale());
-        }
-    }
-    
-    /**
-     * Cerca una prenotazione (bigliettaio)
-     */
-    private void cercaPrenotazione() {
-        System.out.println("\n========== RICERCA PRENOTAZIONE ==========");
-        
-        System.out.print("Codice prenotazione [opzionale]: ");
-        String codice = scanner.nextLine().trim();
-        
-        System.out.print("Nome cliente [opzionale]: ");
-        String nome = scanner.nextLine().trim();
-        
-        System.out.print("Cognome cliente [opzionale]: ");
-        String cognome = scanner.nextLine().trim();
-        
-        System.out.print("Titolo film [opzionale]: ");
-        String titolo = scanner.nextLine().trim();
-        
-        List<Prenotazione> risultati = sistema.cercaPrenotazioni(
-            codice.isEmpty() ? null : codice,
-            nome.isEmpty() ? null : nome,
-            cognome.isEmpty() ? null : cognome,
-            titolo.isEmpty() ? null : titolo,
-            null,
-            null
-        );
-        
-        if (risultati.isEmpty()) {
-            System.out.println("Nessuna prenotazione trovata!");
-        } else {
-            System.out.println("\nPrenotazioni trovate:");
-            for (Prenotazione p : risultati) {
-                System.out.printf("\nCodice: %s\n", p.getCodicePrenotazione());
-                System.out.println("Cliente: " + p.getCliente().getNome() + " " + p.getCliente().getCognome());
-                System.out.println("Film: " + p.getProiezione().getFilm().getTitolo());
-                System.out.println("Data/Ora: " + p.getProiezione().getDataOraProiezione().format(DATETIME_FORMATTER));
-                System.out.println("Biglietti: " + p.getNumeroBiglietti());
-                System.out.printf("Costo: %.2f€\n", p.getCostoTotale());
-            }
         }
     }
     
