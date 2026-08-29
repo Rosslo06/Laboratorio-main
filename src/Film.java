@@ -2,8 +2,6 @@
 
 /**
  * Classe che rappresenta un film nel sistema CineMax
- * @author Andrea
- * @version 1.0
  */
 public class Film {
     
