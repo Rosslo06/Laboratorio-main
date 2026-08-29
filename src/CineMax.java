@@ -121,7 +121,7 @@ public class CineMax {
     }
     
     /**
-     * Menu per i clienti
+     * Menu per la gesione dei clienti
      */
     private boolean menuCliente() {
         boolean continua = true;
@@ -166,7 +166,7 @@ public class CineMax {
     }
     
     /**
-     * Menu per i proiezionisti
+     * Menu per la gestione dei  proiezionisti
      */
     private boolean menuProiezionista() {
         boolean continua = true;
@@ -205,7 +205,7 @@ public class CineMax {
     }
     
     /**
-     * Menu per i bigliettai
+     * Menu per la gestione dei bigliettai
      */
     private boolean menuBigliettaio() {
         boolean continua = true;

@@ -89,6 +89,7 @@ public class GestoreDati {
 
     /**
      * Carica le proiezioni dal file CSV (con fallback su TXT)
+        * @return una lista di proiezioni
      */
     public static List<Proiezione> caricaProiezioni() {
         List<Proiezione> proiezioni = new ArrayList<>();
@@ -150,6 +151,7 @@ public class GestoreDati {
     
     /**
      * Carica le proiezioni da file CSV
+        * @param csvFile il file CSV da cui caricare le proiezioni
      */
     private static List<Proiezione> caricaProiezioniDaCSV(File csvFile) {
         List<Proiezione> proiezioni = new ArrayList<>();
@@ -217,6 +219,7 @@ public class GestoreDati {
     
     /**
      * Rimuove virgolette e spazi da un campo CSV
+        * @param campo il campo da pulire
      */
     private static String pulisciCampo(String campo) {
         if (campo == null) {
@@ -235,6 +238,8 @@ public class GestoreDati {
     
     /**
      * Splitta una riga CSV gestendo le virgolette
+        * @param line la riga CSV da splittare
+        * @return un array di stringhe con i campi  
      */
     private static String[] parseCSVLine(String line) {
         List<String> risultato = new ArrayList<>();
@@ -260,6 +265,7 @@ public class GestoreDati {
     
     /**
      * Salva le proiezioni nel file TXT
+     * @param proiezioni la lista di proiezioni da salvare nel file 
      */
     public static void salvaProiezioni(List<Proiezione> proiezioni) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PROIEZIONI))) {
@@ -281,6 +287,7 @@ public class GestoreDati {
     
     /**
      * Carica tutti gli utenti dal file
+     * @return una lista di utenti appena inseriti 
      */
     public static List<Utente> caricaUtenti() {
         List<Utente> utenti = new ArrayList<>();
@@ -342,6 +349,7 @@ public class GestoreDati {
     
     /**
      * Crea gli utenti di default
+     * @param utenti la lista di utenti a cui aggiungere gli utenti di default
      */
     private static void creaUtentiDefault(List<Utente> utenti) {
         // Proiezionisti
@@ -365,6 +373,14 @@ public class GestoreDati {
     
     /**
      * Crea un utente dal ruolo specificato
+        * @param nome il nome dell'utente
+        * @param cognome il cognome dell'utente
+        * @param username l'username dell'utente
+        * @param password la password dell'utente
+        * @param dataNascita la data di nascita dell'utente
+        * @param luogo il luogo di domicilio dell'utente
+        * @param ruolo il ruolo dell'utente (cliente, proiezionista, bigliettaio 
+        *@return l'utente creato o null se il ruolo non è valido
      */
     private static Utente creaUtenteDalRuolo(String nome, String cognome, String username, 
                                              String password, LocalDate dataNascita, 
@@ -390,6 +406,7 @@ public class GestoreDati {
     
     /**
      * Salva gli utenti nel file
+     * @param utenti la lista di utenti da salvare nel file
      */
     public static void salvaUtenti(List<Utente> utenti) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_UTENTI))) {
@@ -411,6 +428,9 @@ public class GestoreDati {
     
     /**
      * Carica le prenotazioni dal file
+        * @param utenti la lista di utenti per associare le prenotazioni ai clienti
+        * @param proiezioni la lista di proiezioni per associare le prenotazioni alle proiezioni
+        * @return una lista di prenotazioni appena caricate
      */
     public static List<Prenotazione> caricaPrenotazioni(List<Utente> utenti, List<Proiezione> proiezioni) {
         List<Prenotazione> prenotazioni = new ArrayList<>();
@@ -474,6 +494,7 @@ public class GestoreDati {
     
     /**
      * Salva le prenotazioni nel file
+     * @param prenotazioni la lista di prenotazioni da salvare nel file
      */
     public static void salvaPrenotazioni(List<Prenotazione> prenotazioni) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PRENOTAZIONI))) {
