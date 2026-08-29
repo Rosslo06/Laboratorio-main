@@ -6,3 +6,4 @@ Francesca;Neri;fneri;password123;1992-07-18;Torino;bigliettaio
 Andrea;Galli;agalli;password123;1995-02-25;Firenze;bigliettaio
 Sara;Ferrari;sferrari;password123;1993-11-30;Bologna;bigliettaio
 Luca;Conti;lconti;password123;1991-06-12;Genova;bigliettaio
+Marcello;Paroldi;moldi;password123;2006-12-07;Vergiate;cliente

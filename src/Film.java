@@ -1,12 +1,12 @@
-import java.io.Serializable;
+
 
 /**
  * Classe che rappresenta un film nel sistema CineMax
  * @author Andrea
  * @version 1.0
  */
-public class Film implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Film {
+    
     
     private String titolo;
     private String genere;

@@ -7,11 +7,9 @@ import java.util.*;
 /**
  * Classe che gestisce il salvataggio e il caricamento dei dati
  * Legge e scrive file CSV e TXT per persistenza dei dati
- * @author Andrea
- * @version 1.0
  */
 public class GestoreDati {
-    private static final String DIR_DATA = "data";
+    
     private static final String FILE_PROIEZIONI = "data/proiezioni.txt";
     private static final String FILE_UTENTI = "data/utenti.txt";
     private static final String FILE_PRENOTAZIONI = "data/prenotazioni.txt";
@@ -19,52 +17,8 @@ public class GestoreDati {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     
-    /**
-     * Blocco iniziale - crea la cartella data se non esiste
-     */
-    static {
-        File dir = new File(DIR_DATA);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        copiaCSVSeNecessario();
-    }
     
-    /**
-     * Copia il file CSV nella cartella data se necessario
-     */
-    private static void copiaCSVSeNecessario() {
-        File cartellaData = new File(DIR_DATA);
-        if (!cartellaData.exists()) {
-            cartellaData.mkdirs();
-        }
-
-        File fileDestinazione = new File(FILE_CSV_PROIEZIONI);
-        if (!fileDestinazione.exists()) {
-            String[] percorsiPossibili = {
-                "../data/proiezioni.csv",
-                "../../data/proiezioni.csv",
-                "proiezioni.csv"
-            };
-
-            for (String percorso : percorsiPossibili) {
-                File fileOrigine = new File(percorso);
-                if (fileOrigine.exists()) {
-                    try (InputStream in = new FileInputStream(fileOrigine);
-                         OutputStream out = new FileOutputStream(fileDestinazione)) {
-                        byte[] buffer = new byte[1024];
-                        int lunghezza;
-                        while ((lunghezza = in.read(buffer)) > 0) {
-                            out.write(buffer, 0, lunghezza);
-                        }
-                        break;
-                    } catch (IOException e) {
-                        System.err.println("Errore durante la copia del CSV: " + e.getMessage());
-                    }
-                }
-            }
-        }
-    }
+    
     
     /**
      * Trova il file CSV cercando in vari percorsi
