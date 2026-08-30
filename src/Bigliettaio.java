@@ -16,7 +16,10 @@ public class Bigliettaio extends Utente {
                       LocalDate dataNascita, String luogoDomicilio) {
         super(nome, cognome, username, password, dataNascita, luogoDomicilio, "bigliettaio");
     }
-    
+    /**
+     * Restituisce una rappresentazione testuale del bigliettaio
+     * @return una stringa che rappresenta il bigliettaio
+     */
     @Override
     public String toString() {
         return "Bigliettaio{" +
