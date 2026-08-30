@@ -7,8 +7,6 @@ import java.util.*;
 /**
  * Classe che gestisce il salvataggio e il caricamento dei dati
  * Legge e scrive file CSV e TXT per persistenza dei dati
- * @author Andrea
- * @version 1.0
  */
 public class GestoreDati {
     private static final String DIR_DATA = "data";
