@@ -8,7 +8,7 @@ import java.time.LocalDate;
  * @version 1.0
  */
 public class Proiezionista extends Utente {
-    private static final long serialVersionUID = 1L;
+    
 
     /**
      * Costruttore per la creazione di un proiezionista

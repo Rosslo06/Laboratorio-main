@@ -7,7 +7,7 @@ import java.time.LocalDate;
  * @version 1.0
  */
 public class Cliente extends Utente {
-    private static final long serialVersionUID = 1L;
+    
     
     /**
      * Costruttore per la creazione di un cliente

@@ -1,4 +1,4 @@
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 /**
@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
  * @author Andrea
  * @version 1.0
  */
-public class Proiezione implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Proiezione{
+    
 
     private int id;
     private Film film;

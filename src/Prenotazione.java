@@ -1,4 +1,4 @@
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -8,8 +8,8 @@ import java.util.UUID;
  * @author Andrea
  * @version 1.0
  */
-public class Prenotazione implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Prenotazione {
+    
 
     private String codicePrenotazione;
     private Cliente cliente;

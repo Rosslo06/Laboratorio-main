@@ -1,4 +1,4 @@
-import java.io.Serializable;
+
 import java.time.LocalDate;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -9,8 +9,8 @@ import java.security.NoSuchAlgorithmException;
  * @author Andrea
  * @version 1.0
  */
-public abstract class Utente implements Serializable {
-    private static final long serialVersionUID = 1L;
+public abstract class Utente {
+    
 
     private String nome;
     private String cognome;
