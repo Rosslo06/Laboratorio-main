@@ -12,13 +12,18 @@ public class GestoreDati {
     private static final String FILE_PRENOTAZIONI = "data/prenotazioni.txt";
 
     // Questi "formattatori" servono per dire a Java come leggere e scrivere le date
-    // Ad esempio: 2026-05-20 invece di formati strani
+    
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     // =========================================================
     // SEZIONE PROIEZIONI
     // =========================================================
+
+    /**
+     * Carica le proiezioni dal file di testo e le restituisce come lista.
+     * @return Lista di oggetti Proiezione caricati dal file.
+     */
 
     public static List<Proiezione> caricaProiezioni() {
         List<Proiezione> proiezioni = new ArrayList<>();
@@ -31,7 +36,7 @@ public class GestoreDati {
 
         // BufferedReader è uno strumento per leggere il file riga per riga in modo efficiente
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String linea;
+            String linea; // Variabile temporanea per leggere ogni riga del file
             int contatoreProiezioni = 1; // Ci serve per dare un ID numerico a ogni proiezione
 
             // Continua a leggere finché ci sono righe nel file
@@ -43,7 +48,7 @@ public class GestoreDati {
                 }
 
                 // Dividiamo la riga in tanti pezzetti usando il punto e virgola come separatore
-                String[] parti = linea.split(";");
+                String[] parti = linea.split(";"); //questo ci darà un array di stringhe con tutti i dati della proiezione
 
                 // Se mancano dei dati, saltiamo questa riga per evitare crash
                 if (parti.length < 8) {
@@ -82,6 +87,11 @@ public class GestoreDati {
 
         return proiezioni;
     }
+
+    /**
+     * Salva la lista di proiezioni nel file di testo.
+     * @param proiezioni Lista di oggetti Proiezione da salvare nel file.
+     */
 
     public static void salvaProiezioni(List<Proiezione> proiezioni) {
         // BufferedWriter e FileWriter servono per scrivere del testo dentro un file
@@ -183,8 +193,13 @@ public class GestoreDati {
 
     private static void creaUtentiDefault(List<Utente> utenti) {
         // Aggiungiamo un paio di utenti finti per avere qualcosa nel sistema al primo avvio
-        utenti.add(new Proiezionista("Marco", "Rossi", "mrossi", "password123", LocalDate.of(1985, 5, 15), "Milano"));
+        utenti.add(new Bigliettaio("Luca", "Bianchi", "lbianchi", "password123", LocalDate.of(1985, 5, 15), "Milano"));
+        utenti.add(new Bigliettaio("Marco", "Rossi", "mrossi", "password123", LocalDate.of(1985, 5, 15), "Milano"));
+        utenti.add(new Bigliettaio("Sofia", "Rossi", "srossi", "password123", LocalDate.of(1985, 5, 15), "Milano"));
+        utenti.add(new Bigliettaio("Andrea", "Bianchi", "abianchi", "password123", LocalDate.of(1985, 5, 15), "Milano"));
         utenti.add(new Bigliettaio("Giovanni", "Verdi", "gverdi", "password123", LocalDate.of(1990, 3, 10), "Napoli"));
+        utenti.add(new Proiezionista("Mario", "Rossi", "mrossi", "password123", LocalDate.of(1985, 5, 15), "Milano"));
+        utenti.add(new Proiezionista("Giulia", "Rossi", "grossi", "password123", LocalDate.of(1985, 5, 15), "Milano"));
     }
 
     public static void salvaUtenti(List<Utente> utenti) {
