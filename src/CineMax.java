@@ -45,13 +45,27 @@ public class CineMax {
     /**
      * Menu principale prima del login
      */
+    /**
+     * Menu principale prima del login
+     */
     private boolean menuPrincipale() {
-        System.out.println("\n========== CINEMAX - SISTEMA DI PRENOTAZIONE ==========");
-        System.out.println("1. Login");
-        System.out.println("2. Registrazione");
-        System.out.println("3. Continua come Guest");
-        System.out.println("4. Esci");
-        System.out.print("Scelta: ");
+        System.out.println("\n");
+        System.out.println("  ██████╗ ██╗███╗   ██╗███████╗███╗   ███╗███████╗██╗  ██╗");
+        System.out.println(" ██╔════╝ ██║████╗  ██║██╔════╝████╗ ████║██╔════╝╚██╗██╔╝");
+        System.out.println(" ██║      ██║██╔██╗ ██║█████╗  ██╔████╔██║███████╗ ╚███╔╝ ");
+        System.out.println(" ██║      ██║██║╚██╗██║██╔══╝  ██║╚██╔╝██║██╔══██║ ██╔██╗ ");
+        System.out.println(" ╚██████╗ ██║██║ ╚████║███████╗██║ ╚═╝ ██║██║  ██║██╔╝ ██╗");
+        System.out.println("  ╚═════╝ ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝");
+        System.out.println(" ══════════════ SISTEMA DI PRENOTAZIONE ══════════════════\n");
+        System.out.println(" ╔═══════════════════════════════════════════════════════╗");
+        System.out.println(" ║                                                       ║");
+        System.out.println(" ║  [1] 👤 Login                                         ║");
+        System.out.println(" ║  [2] 📝 Registrazione                                 ║");
+        System.out.println(" ║  [3] 🍿 Continua come Guest                           ║");
+        System.out.println(" ║  [4] ❌ Esci                                          ║");
+        System.out.println(" ║                                                       ║");
+        System.out.println(" ╚═══════════════════════════════════════════════════════╝");
+        System.out.print("\n ➤ Scelta: ");
         
         String scelta = scanner.nextLine().trim();
         
@@ -64,7 +78,7 @@ public class CineMax {
         } else if (scelta.equals("4")) {
             return false;
         } else {
-            System.out.println("Scelta non valida!");
+            System.out.println("\n ⚠️  Scelta non valida! Riprova.");
         }
         
         return true;
