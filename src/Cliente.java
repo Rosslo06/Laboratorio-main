@@ -16,7 +16,10 @@ public class Cliente extends Utente {
                    LocalDate dataNascita, String luogoDomicilio) {
         super(nome, cognome, username, password, dataNascita, luogoDomicilio, "cliente");
     }
-    
+    /**
+     * Restituisce una rappresentazione testuale dei dati del cliente
+     * @return una stringa che rappresenta il cliente
+     */
     @Override
     public String toString() {
         return "Cliente{" +
