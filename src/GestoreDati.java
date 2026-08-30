@@ -6,734 +6,289 @@ import java.util.*;
 
 public class GestoreDati {
 
+    // Questi sono i percorsi dei file testuali dove salveremo i dati
     private static final String FILE_PROIEZIONI = "data/proiezioni.txt";
     private static final String FILE_UTENTI = "data/utenti.txt";
     private static final String FILE_PRENOTAZIONI = "data/prenotazioni.txt";
-    private static final String FILE_CSV_PROIEZIONI = "data/proiezioni.csv";
 
-    private static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    // Questi "formattatori" servono per dire a Java come leggere e scrivere le date
+    // Ad esempio: 2026-05-20 invece di formati strani
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    private static final DateTimeFormatter DATETIME_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-
-    // =========================
-    // PROIEZIONI
-    // =========================
+    // =========================================================
+    // SEZIONE PROIEZIONI
+    // =========================================================
 
     public static List<Proiezione> caricaProiezioni() {
-
         List<Proiezione> proiezioni = new ArrayList<>();
-
-        File csvFile = new File(FILE_CSV_PROIEZIONI);
-
-        if (csvFile.exists()) {
-            return caricaProiezioniDaCSV(csvFile);
-        }
-
         File file = new File(FILE_PROIEZIONI);
 
+        // Se il file non esiste ancora (es. primo avvio), restituiamo una lista vuota
         if (!file.exists()) {
             return proiezioni;
         }
 
-        try (BufferedReader reader =
-                     new BufferedReader(new FileReader(file))) {
+        // BufferedReader è uno strumento per leggere il file riga per riga in modo efficiente
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String linea;
+            int contatoreProiezioni = 1; // Ci serve per dare un ID numerico a ogni proiezione
 
-            String line;
-            int contatoreProiezioni = 1;
-
-            while ((line = reader.readLine()) != null) {
-
-                if (line.trim().isEmpty() || line.startsWith("#")) {
-                    continue;
+            // Continua a leggere finché ci sono righe nel file
+            while ((linea = reader.readLine()) != null) {
+                
+                // Ignora le righe vuote o quelle che iniziano con # (che usiamo per i commenti)
+                if (linea.isEmpty() || linea.startsWith("#")) {
+                    continue; 
                 }
 
-                try {
-                    String[] parti = line.split(";");
+                // Dividiamo la riga in tanti pezzetti usando il punto e virgola come separatore
+                String[] parti = linea.split(";");
 
-                    if (parti.length < 8) {
-                        continue;
-                    }
-
-                    String titolo = parti[0].trim();
-                    String genere = parti[1].trim();
-                    String regista = parti[2].trim();
-
-                    int anno = Integer.parseInt(parti[3].trim());
-                    int durata = Integer.parseInt(parti[4].trim());
-                    int etaMinima = Integer.parseInt(parti[5].trim());
-
-                    LocalDateTime dataOra =
-                            LocalDateTime.parse(
-                                    parti[6].trim(),
-                                    DATETIME_FORMATTER
-                            );
-
-                    double costoBiglietto =
-                            Double.parseDouble(
-                                    parti[7].trim().replace(",", ".")
-                            );
-
-                    Film film = new Film(
-                            titolo,
-                            genere,
-                            regista,
-                            anno,
-                            durata,
-                            etaMinima
-                    );
-
-                    Proiezione proiezione = new Proiezione(
-                            contatoreProiezioni++,
-                            film,
-                            dataOra,
-                            costoBiglietto
-                    );
-
-                    proiezioni.add(proiezione);
-
-                } catch (Exception e) {
-                    System.err.println(
-                            "Errore nel parsing della riga: " + line
-                    );
+                // Se mancano dei dati, saltiamo questa riga per evitare crash
+                if (parti.length < 8) {
+                    continue; 
                 }
+
+                // Estraiamo i dati dall'array "parti"
+                String titolo = parti[0];
+                String genere = parti[1];
+                String regista = parti[2];
+                
+                // Integer.parseInt trasforma il testo in un numero intero
+                int anno = Integer.parseInt(parti[3]);
+                int durata = Integer.parseInt(parti[4]);
+                int etaMinima = Integer.parseInt(parti[5]);
+
+                // Trasformiamo il testo della data in un vero e proprio oggetto LocalDateTime
+                LocalDateTime dataOra = LocalDateTime.parse(parti[6], DATETIME_FORMATTER);
+                
+                // Double.parseDouble trasforma il testo in un numero con la virgola
+                // Sostituiamo la virgola con il punto perché Java vuole il punto per i decimali
+                double costo = Double.parseDouble(parti[7].replace(",", "."));
+
+                // Creiamo gli oggetti con i dati appena letti
+                Film film = new Film(titolo, genere, regista, anno, durata, etaMinima);
+                Proiezione proiezione = new Proiezione(contatoreProiezioni, film, dataOra, costo);
+                
+                // Aggiungiamo la proiezione alla lista finale
+                proiezioni.add(proiezione);
+                contatoreProiezioni++; // Aumentiamo l'ID per la prossima proiezione
             }
 
-        } catch (IOException e) {
-            System.err.println(
-                    "Errore nella lettura: " + e.getMessage()
-            );
+        } catch (Exception e) {
+            System.out.println("C'è stato un errore nel leggere le proiezioni: " + e.getMessage());
         }
 
         return proiezioni;
     }
 
+    public static void salvaProiezioni(List<Proiezione> proiezioni) {
+        // BufferedWriter e FileWriter servono per scrivere del testo dentro un file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PROIEZIONI))) {
+            
+            // Scriviamo un'intestazione per ricordarci l'ordine dei dati
+            writer.write("# Formato: titolo;genere;regista;anno;durata;etaMinima;dataOra;costo\n");
 
-    private static List<Proiezione> caricaProiezioniDaCSV(File csvFile) {
-
-        List<Proiezione> proiezioni = new ArrayList<>();
-
-        DateTimeFormatter csvDateFormatter =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        int contatoreProiezioni = 1;
-
-        try (BufferedReader reader =
-                     new BufferedReader(new FileReader(csvFile))) {
-
-            String line;
-            boolean primaLinea = true;
-
-            while ((line = reader.readLine()) != null) {
-
-                if (line.trim().isEmpty() || line.startsWith("#")) {
-                    continue;
-                }
-
-                // Salta l'intestazione del CSV
-                if (primaLinea) {
-                    primaLinea = false;
-
-                    if (line.toLowerCase().contains("titolo")
-                            || line.toLowerCase().contains("data_ora")) {
-                        continue;
-                    }
-                }
-
-                try {
-                    String[] parti = parseCSVLine(line);
-
-                    if (parti.length < 8) {
-                        continue;
-                    }
-
-                    String dataStr = pulisciCampo(parti[0]);
-                    String titolo = pulisciCampo(parti[1]);
-                    String genere = pulisciCampo(parti[2]);
-                    String regista = pulisciCampo(parti[3]);
-
-                    int anno =
-                            Integer.parseInt(pulisciCampo(parti[4]));
-
-                    int durata =
-                            Integer.parseInt(pulisciCampo(parti[5]));
-
-                    int etaMinima =
-                            Integer.parseInt(pulisciCampo(parti[6]));
-
-                    double costoBiglietto =
-                            Double.parseDouble(
-                                    pulisciCampo(parti[7])
-                                            .replace(",", ".")
-                            );
-
-                    LocalDateTime dataOra;
-
-                    if (dataStr.contains("T")) {
-                        dataOra = LocalDateTime.parse(dataStr);
-                    } else {
-                        dataOra = LocalDateTime.parse(
-                                dataStr,
-                                csvDateFormatter
-                        );
-                    }
-
-                    Film film = new Film(
-                            titolo,
-                            genere,
-                            regista,
-                            anno,
-                            durata,
-                            etaMinima
-                    );
-
-                    Proiezione proiezione = new Proiezione(
-                            contatoreProiezioni++,
-                            film,
-                            dataOra,
-                            costoBiglietto
-                    );
-
-                    proiezioni.add(proiezione);
-
-                } catch (Exception e) {
-                    System.err.println(
-                            "Errore nel parsing della riga: " + line
-                    );
-                }
-            }
-
-        } catch (IOException e) {
-            System.err.println(
-                    "Errore nella lettura del CSV: " + e.getMessage()
-            );
-        }
-
-        return proiezioni;
-    }
-
-
-    private static String pulisciCampo(String campo) {
-
-        if (campo == null) {
-            return "";
-        }
-
-        String pulito = campo.trim();
-
-        if (pulito.startsWith("\"")
-                && pulito.endsWith("\"")
-                && pulito.length() >= 2) {
-
-            pulito = pulito.substring(
-                    1,
-                    pulito.length() - 1
-            ).trim();
-        }
-
-        return pulito.replace("\"", "").trim();
-    }
-
-
-    private static String[] parseCSVLine(String line) {
-
-        List<String> risultato = new ArrayList<>();
-
-        StringBuilder campoCorrente =
-                new StringBuilder();
-
-        boolean dentroVirgolette = false;
-
-        for (int i = 0; i < line.length(); i++) {
-
-            char c = line.charAt(i);
-
-            if (c == '"') {
-
-                dentroVirgolette = !dentroVirgolette;
-
-            } else if (c == ',' && !dentroVirgolette) {
-
-                risultato.add(campoCorrente.toString());
-
-                campoCorrente = new StringBuilder();
-
-            } else {
-
-                campoCorrente.append(c);
-            }
-        }
-
-        risultato.add(campoCorrente.toString());
-
-        return risultato.toArray(new String[0]);
-    }
-
-
-    public static void salvaProiezioni(
-            List<Proiezione> proiezioni) {
-
-        try (BufferedWriter writer =
-                     new BufferedWriter(
-                             new FileWriter(FILE_PROIEZIONI))) {
-
-            writer.write(
-                    "# Formato: titolo;genere;regista;anno;" +
-                    "durata;etaMinima;dataOra;costo\n"
-            );
-
+            // Per ogni proiezione nella lista, costruiamo la riga da salvare
             for (Proiezione p : proiezioni) {
-
                 Film f = p.getFilm();
 
-                String linea = String.format(
-                        "%s;%s;%s;%d;%d;%d;%s;%.2f\n",
+                // Trasformiamo la data in un testo semplice leggibile
+                String dataFormattata = p.getDataOraProiezione().format(DATETIME_FORMATTER);
 
-                        f.getTitolo(),
-                        f.getGenere(),
-                        f.getRegista(),
-                        f.getAnno(),
-                        f.getDurata(),
-                        f.getEtaMinimaPubblico(),
+                // Concateniamo tutti i dati unendoli con un punto e virgola
+                // Il \n alla fine serve per andare a capo!
+                String rigaDaSalvare = f.getTitolo() + ";" + 
+                                       f.getGenere() + ";" + 
+                                       f.getRegista() + ";" + 
+                                       f.getAnno() + ";" + 
+                                       f.getDurata() + ";" + 
+                                       f.getEtaMinimaPubblico() + ";" + 
+                                       dataFormattata + ";" + 
+                                       p.getCostoBiglietto() + "\n";
 
-                        p.getDataOraProiezione()
-                                .format(DATETIME_FORMATTER),
-
-                        p.getCostoBiglietto()
-                );
-
-                writer.write(linea);
+                // Scriviamo la riga nel file
+                writer.write(rigaDaSalvare);
             }
 
-        } catch (IOException e) {
-            System.err.println(
-                    "Errore nel salvataggio: " + e.getMessage()
-            );
+        } catch (Exception e) {
+            System.out.println("Errore nel salvataggio proiezioni: " + e.getMessage());
         }
     }
 
-
-    // =========================
-    // UTENTI
-    // =========================
+    // =========================================================
+    // SEZIONE UTENTI
+    // =========================================================
 
     public static List<Utente> caricaUtenti() {
-
         List<Utente> utenti = new ArrayList<>();
-
         File file = new File(FILE_UTENTI);
 
+        // Se il file non esiste, creiamo degli utenti base di prova e salviamoli
         if (!file.exists()) {
-
             creaUtentiDefault(utenti);
             salvaUtenti(utenti);
-
             return utenti;
         }
 
-        try (BufferedReader reader =
-                     new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String linea;
 
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-
-                if (line.trim().isEmpty()
-                        || line.startsWith("#")) {
+            while ((linea = reader.readLine()) != null) {
+                if (linea.isEmpty() || linea.startsWith("#")) {
                     continue;
                 }
 
-                try {
+                String[] parti = linea.split(";");
+                if (parti.length < 7) {
+                    continue;
+                }
 
-                    String[] parti = line.split(";");
+                String nome = parti[0];
+                String cognome = parti[1];
+                String username = parti[2];
+                String password = parti[3];
+                String dataStr = parti[4];
+                String luogo = parti[5];
+                String ruolo = parti[6];
 
-                    if (parti.length < 7) {
-                        continue;
-                    }
+                LocalDate dataNascita = null;
+                // Controlliamo se la data non è vuota prima di provare a convertirla
+                if (!dataStr.equals("") && !dataStr.equals("null")) {
+                    dataNascita = LocalDate.parse(dataStr, DATE_FORMATTER);
+                }
 
-                    String nome = parti[0].trim();
-                    String cognome = parti[1].trim();
-                    String username = parti[2].trim();
-                    String password = parti[3].trim();
-                    String dataNascitaStr = parti[4].trim();
-                    String luogo = parti[5].trim();
-                    String ruolo = parti[6].trim();
+                // In base al ruolo scritto nel file, creiamo il tipo di utente corretto
+                Utente nuovoUtente = null;
+                if (ruolo.equals("cliente")) {
+                    nuovoUtente = new Cliente(nome, cognome, username, password, dataNascita, luogo);
+                } else if (ruolo.equals("proiezionista")) {
+                    nuovoUtente = new Proiezionista(nome, cognome, username, password, dataNascita, luogo);
+                } else if (ruolo.equals("bigliettaio")) {
+                    nuovoUtente = new Bigliettaio(nome, cognome, username, password, dataNascita, luogo);
+                }
 
-                    LocalDate dataNascita = null;
-
-                    if (!dataNascitaStr.isEmpty()
-                            && !dataNascitaStr.equals("null")) {
-
-                        dataNascita = LocalDate.parse(
-                                dataNascitaStr,
-                                DATE_FORMATTER
-                        );
-                    }
-
-                    Utente utente = creaUtenteDalRuolo(
-                            nome,
-                            cognome,
-                            username,
-                            password,
-                            dataNascita,
-                            luogo,
-                            ruolo
-                    );
-
-                    if (utente != null) {
-                        utenti.add(utente);
-                    }
-
-                } catch (Exception e) {
-
-                    System.err.println(
-                            "Errore nel parsing dell'utente: "
-                            + line
-                    );
+                // Se l'abbiamo creato con successo, lo aggiungiamo alla lista
+                if (nuovoUtente != null) {
+                    utenti.add(nuovoUtente);
                 }
             }
-
-        } catch (IOException e) {
-
-            System.err.println(
-                    "Errore nella lettura: "
-                    + e.getMessage()
-            );
-        }
-
-        if (utenti.isEmpty()) {
-
-            creaUtentiDefault(utenti);
-            salvaUtenti(utenti);
+        } catch (Exception e) {
+            System.out.println("Errore nella lettura utenti: " + e.getMessage());
         }
 
         return utenti;
     }
 
-
-    private static void creaUtentiDefault(
-            List<Utente> utenti) {
-
-        utenti.add(
-                new Proiezionista(
-                        "Marco",
-                        "Rossi",
-                        "mrossi",
-                        "password123",
-                        LocalDate.of(1985, 5, 15),
-                        "Milano"
-                )
-        );
-
-        utenti.add(
-                new Proiezionista(
-                        "Elena",
-                        "Bianchi",
-                        "ebianchi",
-                        "password123",
-                        LocalDate.of(1988, 8, 22),
-                        "Roma"
-                )
-        );
-
-        utenti.add(
-                new Bigliettaio(
-                        "Giovanni",
-                        "Verdi",
-                        "gverdi",
-                        "password123",
-                        LocalDate.of(1990, 3, 10),
-                        "Napoli"
-                )
-        );
-
-        utenti.add(
-                new Bigliettaio(
-                        "Francesca",
-                        "Neri",
-                        "fneri",
-                        "password123",
-                        LocalDate.of(1992, 7, 18),
-                        "Torino"
-                )
-        );
-
-        utenti.add(
-                new Bigliettaio(
-                        "Andrea",
-                        "Galli",
-                        "agalli",
-                        "password123",
-                        LocalDate.of(1995, 2, 25),
-                        "Firenze"
-                )
-        );
-
-        utenti.add(
-                new Bigliettaio(
-                        "Sara",
-                        "Ferrari",
-                        "sferrari",
-                        "password123",
-                        LocalDate.of(1993, 11, 30),
-                        "Bologna"
-                )
-        );
-
-        utenti.add(
-                new Bigliettaio(
-                        "Luca",
-                        "Conti",
-                        "lconti",
-                        "password123",
-                        LocalDate.of(1991, 6, 12),
-                        "Genova"
-                )
-        );
+    private static void creaUtentiDefault(List<Utente> utenti) {
+        // Aggiungiamo un paio di utenti finti per avere qualcosa nel sistema al primo avvio
+        utenti.add(new Proiezionista("Marco", "Rossi", "mrossi", "password123", LocalDate.of(1985, 5, 15), "Milano"));
+        utenti.add(new Bigliettaio("Giovanni", "Verdi", "gverdi", "password123", LocalDate.of(1990, 3, 10), "Napoli"));
     }
 
-
-    private static Utente creaUtenteDalRuolo(
-            String nome,
-            String cognome,
-            String username,
-            String password,
-            LocalDate dataNascita,
-            String luogo,
-            String ruolo) {
-
-        try {
-
-            if (ruolo.equalsIgnoreCase("cliente")) {
-
-                return new Cliente(
-                        nome,
-                        cognome,
-                        username,
-                        password,
-                        dataNascita,
-                        luogo
-                );
-            }
-
-            if (ruolo.equalsIgnoreCase("proiezionista")) {
-
-                return new Proiezionista(
-                        nome,
-                        cognome,
-                        username,
-                        password,
-                        dataNascita,
-                        luogo
-                );
-            }
-
-            if (ruolo.equalsIgnoreCase("bigliettaio")) {
-
-                return new Bigliettaio(
-                        nome,
-                        cognome,
-                        username,
-                        password,
-                        dataNascita,
-                        luogo
-                );
-            }
-
-        } catch (Exception e) {
-
-            return null;
-        }
-
-        return null;
-    }
-
-
-    public static void salvaUtenti(
-            List<Utente> utenti) {
-
-        try (BufferedWriter writer =
-                     new BufferedWriter(
-                             new FileWriter(FILE_UTENTI))) {
-
-            writer.write(
-                    "# Formato: nome;cognome;username;" +
-                    "password;dataNascita;luogo;ruolo\n"
-            );
+    public static void salvaUtenti(List<Utente> utenti) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_UTENTI))) {
+            writer.write("# Formato: nome;cognome;username;password;dataNascita;luogo;ruolo\n");
 
             for (Utente u : utenti) {
+                
+                // Se l'utente non ha inserito la data di nascita, mettiamo uno spazio vuoto, 
+                // altrimenti la formattiamo normalmente
+                String dataTesto = "";
+                if (u.getDataNascita() != null) {
+                    dataTesto = u.getDataNascita().format(DATE_FORMATTER);
+                }
 
-                String dataNascita =
-                        u.getDataNascita() != null
-                                ? u.getDataNascita()
-                                        .format(DATE_FORMATTER)
-                                : "";
+                String rigaDaSalvare = u.getNome() + ";" + 
+                                       u.getCognome() + ";" + 
+                                       u.getUsername() + ";" + 
+                                       "password123" + ";" +  // Per semplicità mettiamo sempre la stessa password fissa
+                                       dataTesto + ";" + 
+                                       u.getLuogoDomicilio() + ";" + 
+                                       u.getRuolo() + "\n";
 
-                String linea = String.format(
-                        "%s;%s;%s;%s;%s;%s;%s\n",
-
-                        u.getNome(),
-                        u.getCognome(),
-                        u.getUsername(),
-                        "password123",
-                        dataNascita,
-                        u.getLuogoDomicilio(),
-                        u.getRuolo()
-                );
-
-                writer.write(linea);
+                writer.write(rigaDaSalvare);
             }
-
-        } catch (IOException e) {
-
-            System.err.println(
-                    "Errore nel salvataggio: "
-                    + e.getMessage()
-            );
+        } catch (Exception e) {
+            System.out.println("Errore nel salvataggio utenti: " + e.getMessage());
         }
     }
 
+    // =========================================================
+    // SEZIONE PRENOTAZIONI
+    // =========================================================
 
-    // =========================
-    // PRENOTAZIONI
-    // =========================
-
-    public static List<Prenotazione> caricaPrenotazioni(
-            List<Utente> utenti,
-            List<Proiezione> proiezioni) {
-
-        List<Prenotazione> prenotazioni =
-                new ArrayList<>();
-
+    // Per caricare le prenotazioni abbiamo bisogno di avere già gli utenti e le proiezioni caricati!
+    public static List<Prenotazione> caricaPrenotazioni(List<Utente> utenti, List<Proiezione> proiezioni) {
+        List<Prenotazione> prenotazioni = new ArrayList<>();
         File file = new File(FILE_PRENOTAZIONI);
 
         if (!file.exists()) {
             return prenotazioni;
         }
 
-        try (BufferedReader reader =
-                     new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String linea;
 
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-
-                if (line.trim().isEmpty()
-                        || line.startsWith("#")) {
+            while ((linea = reader.readLine()) != null) {
+                if (linea.isEmpty() || linea.startsWith("#")) {
                     continue;
                 }
 
-                try {
+                String[] parti = linea.split(";");
+                if (parti.length < 3) {
+                    continue;
+                }
 
-                    String[] parti = line.split(";");
+                String usernameCercato = parti[0];
+                int idProiezioneCercata = Integer.parseInt(parti[1]);
+                int numeroBiglietti = Integer.parseInt(parti[2]);
 
-                    if (parti.length < 3) {
-                        continue;
+                // 1. Dobbiamo trovare l'oggetto Cliente che ha quello specifico username
+                Cliente clienteTrovato = null;
+                for (Utente u : utenti) {
+                    if (u.getRuolo().equals("cliente") && u.getUsername().equals(usernameCercato)) {
+                        clienteTrovato = (Cliente) u;
+                        break; // Trovato, possiamo fermare il ciclo
                     }
+                }
 
-                    String usernameCliente =
-                            parti[0].trim();
-
-                    int idProiezione =
-                            Integer.parseInt(parti[1].trim());
-
-                    int numeroBiglietti =
-                            Integer.parseInt(parti[2].trim());
-
-
-                    Cliente cliente = null;
-
-                    for (Utente u : utenti) {
-
-                        if (u instanceof Cliente
-                                && u.getUsername()
-                                .equals(usernameCliente)) {
-
-                            cliente = (Cliente) u;
-                            break;
-                        }
+                // 2. Dobbiamo trovare l'oggetto Proiezione che ha quello specifico ID
+                Proiezione proiezioneTrovata = null;
+                for (Proiezione p : proiezioni) {
+                    if (p.getId() == idProiezioneCercata) {
+                        proiezioneTrovata = p;
+                        break; // Trovato, fermiamo il ciclo
                     }
+                }
 
-
-                    Proiezione proiezione = null;
-
-                    for (Proiezione p : proiezioni) {
-
-                        if (p.getId() == idProiezione) {
-
-                            proiezione = p;
-                            break;
-                        }
-                    }
-
-
-                    if (cliente != null
-                            && proiezione != null) {
-
-                        Prenotazione prenotazione =
-                                new Prenotazione(
-                                        cliente,
-                                        proiezione,
-                                        numeroBiglietti
-                                );
-
-                        prenotazioni.add(prenotazione);
-                    }
-
-                } catch (Exception e) {
-
-                    System.err.println(
-                            "Errore nel parsing: " + line
-                    );
+                // 3. Se abbiamo trovato entrambi, creiamo la prenotazione
+                if (clienteTrovato != null && proiezioneTrovata != null) {
+                    Prenotazione p = new Prenotazione(clienteTrovato, proiezioneTrovata, numeroBiglietti);
+                    prenotazioni.add(p);
                 }
             }
-
-        } catch (IOException e) {
-
-            System.err.println(
-                    "Errore nella lettura: "
-                    + e.getMessage()
-            );
+        } catch (Exception e) {
+            System.out.println("Errore nella lettura prenotazioni: " + e.getMessage());
         }
 
         return prenotazioni;
     }
 
-
-    public static void salvaPrenotazioni(
-            List<Prenotazione> prenotazioni) {
-
-        try (BufferedWriter writer =
-                     new BufferedWriter(
-                             new FileWriter(
-                                     FILE_PRENOTAZIONI))) {
-
-            writer.write(
-                    "# Formato: usernameCliente;" +
-                    "idProiezione;numeroBiglietti\n"
-            );
+    public static void salvaPrenotazioni(List<Prenotazione> prenotazioni) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PRENOTAZIONI))) {
+            writer.write("# Formato: usernameCliente;idProiezione;numeroBiglietti\n");
 
             for (Prenotazione p : prenotazioni) {
+                String rigaDaSalvare = p.getCliente().getUsername() + ";" + 
+                                       p.getProiezione().getId() + ";" + 
+                                       p.getNumeroBiglietti() + "\n";
 
-                String linea = String.format(
-                        "%s;%d;%d\n",
-
-                        p.getCliente().getUsername(),
-                        p.getProiezione().getId(),
-                        p.getNumeroBiglietti()
-                );
-
-                writer.write(linea);
+                writer.write(rigaDaSalvare);
             }
-
-        } catch (IOException e) {
-
-            System.err.println(
-                    "Errore nel salvataggio: "
-                    + e.getMessage()
-            );
+        } catch (Exception e) {
+            System.out.println("Errore nel salvataggio prenotazioni: " + e.getMessage());
         }
     }
 }
