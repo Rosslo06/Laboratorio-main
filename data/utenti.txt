@@ -1,0 +1,8 @@
+# Formato: nome;cognome;username;password;dataNascita;luogo;ruolo
+Luca;Bianchi;lbianchi;password123;1985-05-15;Milano;bigliettaio
+Marco;Rossi;mrossi;password123;1985-05-15;Milano;bigliettaio
+Sofia;Rossi;srossi;password123;1985-05-15;Milano;bigliettaio
+Andrea;Bianchi;abianchi;password123;1985-05-15;Milano;bigliettaio
+Giovanni;Verdi;gverdi;password123;1990-03-10;Napoli;bigliettaio
+Mario;Rossi;mrossi;password123;1985-05-15;Milano;proiezionista
+Giulia;Rossi;grossi;password123;1985-05-15;Milano;proiezionista
