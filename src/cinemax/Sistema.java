@@ -4,11 +4,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * Classe principale che gestisce la logica dell'applicazione CineMax
- * Gestisce: login, proiezioni, prenotazioni, ricerche
+ * Classe principale che gestisce la logica dell'applicazione CineMax.
  * 
  * @author Andrea
- * @version 1.0
+ * @version 1.1
  */
 public class Sistema {
     private List<Proiezione> proiezioni;
@@ -17,8 +16,7 @@ public class Sistema {
     private Utente utenteCorrente;
 
     /**
-     * Costruttore che inizializza il sistema
-     * 
+     * Costruttore che inizializza le liste e carica i dati dal sistema di persistenza.
      */
     public Sistema() {
         this.proiezioni = new ArrayList<>();
@@ -29,7 +27,7 @@ public class Sistema {
     }
 
     /**
-     * Carica tutti i dati dal file
+     * Carica utenti, proiezioni e prenotazioni richiamando il GestoreDati.
      */
     private void caricaDati() {
         this.utenti = GestoreDati.caricaUtenti();
@@ -37,15 +35,12 @@ public class Sistema {
         this.prenotazioni = GestoreDati.caricaPrenotazioni(utenti, proiezioni);
     }
 
-    // ============ METODI DI LOGIN ============
-
     /**
-     * Effettua il login di un utente
+     * Effettua il login di un utente controllando credenziali e hash della password.
      * 
      * @param username l'username dell'utente
-     * @param password la password dell'utente
-     * @return true se il login è avvenuto con successo, false altrimenti
-     * 
+     * @param password la password in chiaro
+     * @return true se il login ha successo, false altrimenti
      */
     public boolean login(String username, String password) {
         for (Utente u : utenti) {
@@ -58,27 +53,24 @@ public class Sistema {
     }
 
     /**
-     * Registra un nuovo cliente
+     * Registra un nuovo cliente nel sistema verificando l'univocità dell'username.
      * 
-     * @param nome           il nome del cliente
-     * @param cognome        il cognome del cliente
-     * @param username       l'username del cliente
-     * @param password       la password del cliente
-     * @param dataNascita    la data di nascita del cliente
+     * @param nome il nome del cliente
+     * @param cognome il cognome del cliente
+     * @param username l'username del cliente
+     * @param password la password del cliente
+     * @param dataNascita la data di nascita del cliente
      * @param luogoDomicilio il luogo di domicilio del cliente
-     * @return true se la registrazione è avvenuta con successo, false altr
-     * 
+     * @return true se la registrazione va a buon fine, false se l'username esiste già
      */
     public boolean registraCliente(String nome, String cognome, String username, String password,
             LocalDate dataNascita, String luogoDomicilio) {
-        // Controlla se l'username esiste già
         for (Utente u : utenti) {
             if (u.getUsername().equals(username)) {
                 return false;
             }
         }
 
-        // Crea un nuovo cliente e lo aggiunge
         Cliente cliente = new Cliente(nome, cognome, username, password, dataNascita, luogoDomicilio);
         utenti.add(cliente);
         GestoreDati.salvaUtenti(utenti);
@@ -86,25 +78,22 @@ public class Sistema {
     }
 
     /**
-     * Effettua il logout
+     * Effettua il logout azzerando l'utente corrente.
      */
     public void logout() {
         this.utenteCorrente = null;
     }
 
-    // ============ METODI DI RICERCA PROIEZIONI ============
-
     /**
-     * Cerca proiezioni in base ai criteri specificati
+     * Cerca proiezioni filtrando per molteplici criteri opzionali.
      * 
-     * @param titolo   il titolo del film (può essere null o vuoto)
-     * @param genere   il genere del film (può essere null o vuoto)
-     * @param dataDa   la data di inizio (può essere null)
-     * @param dataA    la data di fine (può essere null)
-     * @param costoMin il costo minimo (può essere negativo per ignorare)
-     * @param costoMax il costo massimo (può essere negativo per ignorare)
-     * @return una lista di proiezioni che soddisfano i criteri
-     * 
+     * @param titolo il titolo del film (può essere null o vuoto)
+     * @param genere il genere del film (può essere null o vuoto)
+     * @param dataDa la data/ora di inizio minima (può essere null)
+     * @param dataA la data/ora di fine massima (può essere null)
+     * @param costoMin il costo minimo del biglietto
+     * @param costoMax il costo massimo del biglietto
+     * @return una lista di proiezioni che soddisfano i filtri
      */
     public List<Proiezione> cercaProiezioni(String titolo, String genere,
             LocalDateTime dataDa, LocalDateTime dataA,
@@ -112,76 +101,71 @@ public class Sistema {
         List<Proiezione> risultati = new ArrayList<>();
 
         for (Proiezione p : proiezioni) {
-            // Controlla titolo
             if (titolo != null && !titolo.isEmpty()) {
                 if (!p.getFilm().getTitolo().toLowerCase().contains(titolo.toLowerCase())) {
                     continue;
                 }
             }
 
-            // Controlla genere
             if (genere != null && !genere.isEmpty()) {
                 if (!p.getFilm().getGenere().equalsIgnoreCase(genere)) {
                     continue;
                 }
             }
 
-            // Controlla data inizio
             if (dataDa != null) {
-                if (!p.getDataOraProiezione().isAfter(dataDa) && !p.getDataOraProiezione().isEqual(dataDa)) {
+                if (p.getDataOraProiezione().isBefore(dataDa)) {
                     continue;
                 }
             }
 
-            // Controlla data fine
             if (dataA != null) {
-                if (!p.getDataOraProiezione().isBefore(dataA) && !p.getDataOraProiezione().isEqual(dataA)) {
+                if (p.getDataOraProiezione().isAfter(dataA)) {
                     continue;
                 }
             }
 
-            // Controlla costo minimo
             if (costoMin >= 0) {
                 if (p.getCostoBiglietto() < costoMin) {
                     continue;
                 }
             }
 
-            // Controlla costo massimo
             if (costoMax >= 0) {
                 if (p.getCostoBiglietto() > costoMax) {
                     continue;
                 }
             }
 
-            // Se passa tutti i filtri, aggiungilo ai risultati
             risultati.add(p);
         }
 
         return risultati;
     }
 
-    // ============ METODI PER AGGIUNGERE/MODIFICARE/ELIMINARE PROIEZIONI
-    // ============
-
     /**
-     * Aggiunge una nuova proiezione
+     * Aggiunge una nuova proiezione al palinsesto controllando conflitti di orario.
      * 
-     * @param film           il film da proiettare
-     * @param dataOra        la data e ora della proiezione
+     * @param film il film da proiettare
+     * @param dataOra la data e ora della proiezione
      * @param costoBiglietto il costo del biglietto
-     * @return true se la proiezione è stata aggiunta con successo, false altrimenti
+     * @return true se aggiunta con successo, false in caso di conflitto o errore
      */
     public boolean aggiungiProiezione(Film film, LocalDateTime dataOra, double costoBiglietto) {
-        // Controlla che non esista già una proiezione a quella data
         for (Proiezione p : proiezioni) {
             if (p.getDataOraProiezione().equals(dataOra)) {
                 return false;
             }
         }
 
-        // Crea la nuova proiezione
-        int nuovoId = proiezioni.size();
+        int maxId = 0;
+        for (Proiezione p : proiezioni) {
+            if (p.getId() > maxId) {
+                maxId = p.getId();
+            }
+        }
+        int nuovoId = maxId + 1;
+
         Proiezione nuovaProiezione = new Proiezione(nuovoId, film, dataOra, costoBiglietto);
         proiezioni.add(nuovaProiezione);
         GestoreDati.salvaProiezioni(proiezioni);
@@ -189,12 +173,11 @@ public class Sistema {
     }
 
     /**
-     * Modifica una proiezione
+     * Modifica la data e l'ora di una proiezione esistente se non possiede prenotazioni attive.
      * 
-     * @param idProiezione l'ID della proiezione da modificare
-     * @param nuovaDataOra la nuova data e ora della proiezione
-     * @return true se la proiezione è stata modificata con successo, false
-     *         altrimenti
+     * @ l'ID della proiezione da modificare
+     * @param nuovaDataOra la nuova data e ora
+     * @return true se modificata con successo, false altrimenti
      */
     public boolean modificaProiezione(int idProiezione, LocalDateTime nuovaDataOra) {
         Proiezione proiezione = trovaProiezione(idProiezione);
@@ -202,7 +185,6 @@ public class Sistema {
             return false;
         }
 
-        // Controlla se ci sono prenotazioni
         int conteggioPrenotazioni = 0;
         for (Prenotazione p : prenotazioni) {
             if (p.getProiezione().getId() == idProiezione) {
@@ -220,11 +202,10 @@ public class Sistema {
     }
 
     /**
-     * Elimina una proiezione
+     * Elimina una proiezione dal sistema se non ha prenotazioni collegate.
      * 
      * @param idProiezione l'ID della proiezione da eliminare
-     * @return true se la proiezione è stata eliminata con successo, false
-     *         altrimenti
+     * @return true se eliminata con successo, false altrimenti
      */
     public boolean eliminaProiezione(int idProiezione) {
         Proiezione proiezione = trovaProiezione(idProiezione);
@@ -232,7 +213,6 @@ public class Sistema {
             return false;
         }
 
-        // Controlla se ci sono prenotazioni
         int conteggioPrenotazioni = 0;
         for (Prenotazione p : prenotazioni) {
             if (p.getProiezione().getId() == idProiezione) {
@@ -249,17 +229,14 @@ public class Sistema {
         return true;
     }
 
-    // ============ METODI PER PRENOTAZIONI ============
-
     /**
-     * Crea una nuova prenotazione
+     * Crea una prenotazione per l'utente cliente attualmente loggato.
      * 
-     * @param idProiezione    l'ID della proiezione da prenotare
-     * @param numeroBiglietti il numero di biglietti da prenotare
-     * @return la prenotazione creata se avvenuta con successo, null altrimenti
+     * @param idProiezione l'ID della proiezione da prenotare
+     * @param numeroBiglietti il numero di biglietti desiderati
+     * @return l'oggetto Prenotazione creato, oppure null se fallisce
      */
     public Prenotazione creaPrenotazione(int idProiezione, int numeroBiglietti) {
-        // Solo i clienti possono prenotare
         if (!(utenteCorrente instanceof Cliente)) {
             return null;
         }
@@ -269,12 +246,10 @@ public class Sistema {
             return null;
         }
 
-        // Controlla che la proiezione sia nel futuro
         if (LocalDateTime.now().isAfter(proiezione.getDataOraProiezione())) {
             return null;
         }
 
-        // Controlla che ci siano abbastanza posti
         int postiOccupati = calcolaPostiOccupati(idProiezione);
         int postiDisponibili = proiezione.getCapacitaSala() - postiOccupati;
 
@@ -282,7 +257,6 @@ public class Sistema {
             return null;
         }
 
-        // Crea e salva la prenotazione
         Prenotazione prenotazione = new Prenotazione((Cliente) utenteCorrente, proiezione, numeroBiglietti);
         prenotazioni.add(prenotazione);
         GestoreDati.salvaPrenotazioni(prenotazioni);
@@ -290,12 +264,11 @@ public class Sistema {
     }
 
     /**
-     * Modifica una prenotazione
+     * Modifica una prenotazione esistente cambiandone la proiezione associata.
      * 
-     * @param codicePrenotazione il codice della prenotazione da modificare
-     * @param nuovaIdProiezione  l'ID della nuova proiezione
-     * @return true se la prenotazione è stata modificata con successo, false
-     *         altrimenti
+     * @param codicePrenotazione il codice univoco della prenotazione
+     * @param nuovaIdProiezione l'ID della nuova proiezione
+     * @return true se modificata con successo, false altrimenti
      */
     public boolean modificaPrenotazione(String codicePrenotazione, int nuovaIdProiezione) {
         Prenotazione prenotazione = trovaPrenotazione(codicePrenotazione);
@@ -303,7 +276,6 @@ public class Sistema {
             return false;
         }
 
-        // Controlla che la proiezione precedente non sia già passata
         if (LocalDateTime.now().isAfter(prenotazione.getProiezione().getDataOraProiezione())) {
             return false;
         }
@@ -313,12 +285,10 @@ public class Sistema {
             return false;
         }
 
-        // Controlla che la nuova proiezione non sia già passata
         if (LocalDateTime.now().isAfter(nuovaProiezione.getDataOraProiezione())) {
             return false;
         }
 
-        // Controlla disponibilità della nuova proiezione
         int postiOccupati = calcolaPostiOccupati(nuovaIdProiezione);
         int postiDisponibili = nuovaProiezione.getCapacitaSala() - postiOccupati;
 
@@ -332,11 +302,10 @@ public class Sistema {
     }
 
     /**
-     * Elimina una prenotazione
+     * Elimina una prenotazione esistente se la proiezione non è ancora avvenuta.
      * 
      * @param codicePrenotazione il codice della prenotazione da eliminare
-     * @return true se la prenotazione è stata eliminata con successo, false
-     *         altrimenti
+     * @return true se eliminata con successo, false altrimenti
      */
     public boolean eliminaPrenotazione(String codicePrenotazione) {
         Prenotazione prenotazione = trovaPrenotazione(codicePrenotazione);
@@ -344,7 +313,6 @@ public class Sistema {
             return false;
         }
 
-        // Controlla che la proiezione sia nel futuro
         if (LocalDateTime.now().isBefore(prenotazione.getProiezione().getDataOraProiezione())) {
             prenotazioni.remove(prenotazione);
             GestoreDati.salvaPrenotazioni(prenotazioni);
@@ -354,32 +322,27 @@ public class Sistema {
         return false;
     }
 
-    // ============ METODI UTILI ============
-
     /**
-     * Calcola quanti posti sono occupati per una proiezione
+     * Calcola il numero totale di posti già occupati per una specifica proiezione.
      * 
      * @param idProiezione l'ID della proiezione
-     * @return il numero di posti occupati per la proiezione
+     * @return il numero di posti occupati
      */
     public int calcolaPostiOccupati(int idProiezione) {
         int totale = 0;
-
         for (Prenotazione p : prenotazioni) {
             if (p.getProiezione().getId() == idProiezione) {
                 totale = totale + p.getNumeroBiglietti();
             }
         }
-
         return totale;
     }
 
     /**
-     * Trova una proiezione per id
+     * Cerca e restituisce una proiezione in base al suo ID.
      * 
-     * @param id l'ID della proiezione da trovare
-     * @return la proiezione trovata, null se non esiste
-     * 
+     * @param id l'ID della proiezione
+     * @return l'oggetto Proiezione trovato, oppure null se inesistente
      */
     public Proiezione trovaProiezione(int id) {
         for (Proiezione p : proiezioni) {
@@ -391,10 +354,10 @@ public class Sistema {
     }
 
     /**
-     * Trova una prenotazione per codice
+     * Cerca e restituisce una prenotazione in base al suo codice alfanumerico.
      * 
-     * @param codice il codice della prenotazione da trovare
-     * @return la prenotazione trovata, null se non esiste
+     * @param codice il codice della prenotazione
+     * @return l'oggetto Prenotazione trovato, oppure null se inesistente
      */
     public Prenotazione trovaPrenotazione(String codice) {
         for (Prenotazione p : prenotazioni) {
@@ -406,13 +369,12 @@ public class Sistema {
     }
 
     /**
-     * Ottiene le prenotazioni del cliente loggato
+     * Restituisce la lista delle prenotazioni effettuate dal cliente attualmente loggato.
      * 
-     * @return una lista di prenotazioni del cliente loggato
+     * @return la lista delle prenotazioni del cliente
      */
     public List<Prenotazione> getPrenotazioniCliente() {
         List<Prenotazione> risultati = new ArrayList<>();
-
         if (!(utenteCorrente instanceof Cliente)) {
             return risultati;
         }
@@ -422,14 +384,13 @@ public class Sistema {
                 risultati.add(p);
             }
         }
-
         return risultati;
     }
 
     /**
-     * Ottiene le prenotazioni di oggi
+     * Restituisce la lista di tutte le prenotazioni programmate per la giornata odierna.
      * 
-     * @return una lista di prenotazioni effettuate oggi
+     * @return la lista delle prenotazioni di oggi
      */
     public List<Prenotazione> getPrenotazioniOggi() {
         List<Prenotazione> risultati = new ArrayList<>();
@@ -441,20 +402,19 @@ public class Sistema {
                 risultati.add(p);
             }
         }
-
         return risultati;
     }
 
     /**
-     * Cerca prenotazioni per bigliettaio
+     * Cerca prenotazioni in base a molteplici criteri (usato dai bigliettai).
      * 
-     * @param codice         il codice della prenotazione (può essere null o vuoto)
-     * @param nomeCliente    il nome del cliente (può essere null o vuoto)
-     * @param cognomeCliente il cognome del cliente (può essere null o vuoto)
-     * @param titoloFilm     il titolo del film (può essere null o vuoto)
-     * @param dataDa         la data di inizio (può essere null)
-     * @param dataA          la data di fine (può essere null)
-     * @return una lista di prenotazioni che soddisfano i criteri
+     * @param codice il codice della prenotazione (opzionale)
+     * @param nomeCliente il nome del cliente (opzionale)
+     * @param cognomeCliente il cognome del cliente (opzionale)
+     * @param titoloFilm il titolo del film (opzionale)
+     * @param dataDa la data di inizio minima (opzionale)
+     * @param dataA la data di fine massima (opzionale)
+     * @return la lista delle prenotazioni che soddisfano i criteri
      */
     public List<Prenotazione> cercaPrenotazioni(String codice, String nomeCliente,
             String cognomeCliente, String titoloFilm,
@@ -462,70 +422,59 @@ public class Sistema {
         List<Prenotazione> risultati = new ArrayList<>();
 
         for (Prenotazione p : prenotazioni) {
-            // Controlla codice
             if (codice != null && !codice.isEmpty()) {
                 if (!p.getCodicePrenotazione().contains(codice)) {
                     continue;
                 }
             }
 
-            // Controlla nome cliente
             if (nomeCliente != null && !nomeCliente.isEmpty()) {
                 if (!p.getCliente().getNome().toLowerCase().contains(nomeCliente.toLowerCase())) {
                     continue;
                 }
             }
 
-            // Controlla cognome cliente
             if (cognomeCliente != null && !cognomeCliente.isEmpty()) {
                 if (!p.getCliente().getCognome().toLowerCase().contains(cognomeCliente.toLowerCase())) {
                     continue;
                 }
             }
 
-            // Controlla titolo film
             if (titoloFilm != null && !titoloFilm.isEmpty()) {
                 if (!p.getProiezione().getFilm().getTitolo().toLowerCase().contains(titoloFilm.toLowerCase())) {
                     continue;
                 }
             }
 
-            // Controlla data inizio
             if (dataDa != null) {
-                if (!p.getProiezione().getDataOraProiezione().isAfter(dataDa) &&
-                        !p.getProiezione().getDataOraProiezione().isEqual(dataDa)) {
+                if (p.getProiezione().getDataOraProiezione().isBefore(dataDa)) {
                     continue;
                 }
             }
 
-            // Controlla data fine
             if (dataA != null) {
-                if (!p.getProiezione().getDataOraProiezione().isBefore(dataA) &&
-                        !p.getProiezione().getDataOraProiezione().isEqual(dataA)) {
+                if (p.getProiezione().getDataOraProiezione().isAfter(dataA)) {
                     continue;
                 }
             }
 
-            // Se passa tutti i filtri, aggiungilo
             risultati.add(p);
         }
 
         return risultati;
     }
 
-    // ============ GETTER ============
-
     /**
-     * Ottiene l'utente corrente
+     * Restituisce l'utente attualmente autenticato nel sistema.
      * 
-     * @return l'utente corrente
+     * @return l'utente corrente, oppure null se nessuno è loggato
      */
     public Utente getUtenteCorrente() {
         return utenteCorrente;
     }
 
     /**
-     * Ottiene la lista delle proiezioni
+     * Restituisce la lista completa delle proiezioni presenti nel sistema.
      * 
      * @return la lista delle proiezioni
      */
@@ -534,7 +483,7 @@ public class Sistema {
     }
 
     /**
-     * Ottiene la lista delle prenotazioni
+     * Restituisce la lista completa delle prenotazioni registrate nel sistema.
      * 
      * @return la lista delle prenotazioni
      */

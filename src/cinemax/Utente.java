@@ -52,12 +52,12 @@ public abstract class Utente {
      */
     private String hashPassword(String password) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes());
+            MessageDigest md = MessageDigest.getInstance("SHA-256"); 
+            byte[] hashedBytes = md.digest(password.getBytes()); //digest significa calcola l'hash della password in byte
             StringBuilder sb = new StringBuilder();
 
             for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b));
+                sb.append(String.format("%02x", b)); // converte ogni byte in una stringa esadecimale a due cifre
             }
 
             return sb.toString();
@@ -183,6 +183,23 @@ public abstract class Utente {
      */
     public void setRuolo(String ruolo) {
         this.ruolo = ruolo;
+    }
+
+    /**
+     * Getter per estrarre l'hash della password (necessario per il salvataggio su file TXT)
+     * @return la stringa esadecimale dell'hash
+     */
+    public String getPasswordHash() {
+        return this.passwordHash;
+    }
+
+    /**
+     * Setter forzato per reidratare l'hash durante il caricamento dal file TXT.
+     * Bypassa la logica di hashing del costruttore.
+     * @param savedHash l'hash letto dal file di testo
+     */
+    public void setPasswordHashForced(String savedHash) {
+        this.passwordHash = savedHash;
     }
 
     /**

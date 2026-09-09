@@ -1,2 +1,0 @@
-# Formato: usernameCliente;idProiezione;numeroBiglietti
-moldi;16;1

@@ -1,8 +1,9 @@
-# Formato: nome;cognome;username;password;dataNascita;luogo;ruolo
-Luca;Bianchi;lbianchi;password123;1985-05-15;Milano;bigliettaio
-Marco;Rossi;mrossi;password123;1985-05-15;Milano;bigliettaio
-Sofia;Rossi;srossi;password123;1985-05-15;Milano;bigliettaio
-Andrea;Bianchi;abianchi;password123;1985-05-15;Milano;bigliettaio
-Giovanni;Verdi;gverdi;password123;1990-03-10;Napoli;bigliettaio
-Mario;Rossi;mrossi;password123;1985-05-15;Milano;proiezionista
-Giulia;Rossi;grossi;password123;1985-05-15;Milano;proiezionista
+# Formato: nome;cognome;username;passwordHash;dataNascita;luogo;ruolo
+Luca;Bianchi;lbianchi;ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f;1985-05-15;Milano;bigliettaio
+Marco;Rossi;mrossi;ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f;1988-08-22;Roma;bigliettaio
+Sofia;Verdi;sverdi;ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f;1992-01-10;Napoli;bigliettaio
+Andrea;Galli;agalli;ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f;1995-11-05;Firenze;bigliettaio
+Giovanni;Neri;gneri;ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f;1990-03-10;Torino;bigliettaio
+Mario;Draghi;mdraghi;ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f;1975-04-20;Bologna;proiezionista
+Giulia;Conte;gconte;ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f;1982-07-14;Genova;proiezionista
+Andrea;Rossetti;aerdna;dafe8686f359b531890807b0167fa9daaf78ab782f4afc67f40939de32cfce6f;2006-07-12;Vergiate;cliente
