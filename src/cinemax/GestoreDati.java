@@ -13,7 +13,6 @@ import java.util.*;
  */
 public class GestoreDati {
 
-    private static final String DIR_DATA = "data";
     private static final String FILE_PROIEZIONI = "data/proiezioni.txt";
     private static final String FILE_UTENTI = "data/utenti.txt";
     private static final String FILE_PRENOTAZIONI = "data/prenotazioni.csv";
@@ -22,15 +21,10 @@ public class GestoreDati {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     
-    static {
-        File dir = new File(DIR_DATA);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-    }
+    
 
     /**
-     * Carica le proiezioni da file di testo o dal CSV iniziale di fallback.
+     * Carica le proiezioni da file di testo o dal CSV iniziale.
      * 
      * @return la lista delle proiezioni caricate
      */
@@ -38,12 +32,14 @@ public class GestoreDati {
         List<Proiezione> proiezioni = new ArrayList<>();
         File fileTxt = new File(FILE_PROIEZIONI);
 
+        // 1. Prova a caricare dal file strutturato TXT (comportamento standard)
         if (fileTxt.exists()) {
             return caricaProiezioniDaTxt(fileTxt);
         }
 
-        File csvFile = trovaFileCSV();
-        if (csvFile != null) {
+        // 2. Se il TXT non esiste, importa i dati dal CSV e crea il TXT per i futuri avvii
+        File csvFile = new File(FILE_CSV_PROIEZIONI);
+        if (csvFile.exists()) {
             proiezioni = caricaProiezioniDaCSV(csvFile);
             salvaProiezioni(proiezioni);
             return proiezioni;
@@ -76,12 +72,13 @@ public class GestoreDati {
                 int durata = Integer.parseInt(parti[5].trim());
                 int etaMinima = Integer.parseInt(parti[6].trim());
                 
+                //questo serve per gestire sia il formato con T che senza T nella data, ossia "2024-06-15T20:30" o "2024-06-15 20:30"
                 LocalDateTime dataOra;
                 String dataStr = parti[7].trim();
                 if (dataStr.contains("T")) {
-                    dataOra = LocalDateTime.parse(dataStr);
+                    dataOra = LocalDateTime.parse(dataStr); // Formato ISO standard
                 } else {
-                    dataOra = LocalDateTime.parse(dataStr, DATETIME_FORMATTER);
+                    dataOra = LocalDateTime.parse(dataStr, DATETIME_FORMATTER); // Formato personalizzato
                 }
                 
                 double costo = Double.parseDouble(parti[8].trim().replace(",", "."));
@@ -96,49 +93,10 @@ public class GestoreDati {
         return proiezioni;
     }
 
-    /**
-     * Cerca il file CSV del palinsesto nei percorsi comuni.
-     * 
-     * @return l'oggetto File del CSV trovato, oppure null
-     */
-    private static File trovaFileCSV() {
-        String[] percorsi = {
-            FILE_CSV_PROIEZIONI,
-            "proiezioni.csv",
-            "../data/proiezioni.csv",
-            "../proiezioni.csv"
-        };
-        
-        for (String p : percorsi) {
-            File f = new File(p);
-            if (f.exists()) {
-                if (!p.equals(FILE_CSV_PROIEZIONI)) {
-                    copiaFile(f, new File(FILE_CSV_PROIEZIONI));
-                }
-                return new File(FILE_CSV_PROIEZIONI);
-            }
-        }
-        return null;
-    }
     
-    /**
-     * Utility per copiare file da una sorgente a una destinazione.
-     * 
-     * @param source il file sorgente
-     * @param dest il file di destinazione
-     */
-    private static void copiaFile(File source, File dest) {
-        try (InputStream in = new FileInputStream(source);
-             OutputStream out = new FileOutputStream(dest)) {
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = in.read(buffer)) > 0) {
-                out.write(buffer, 0, length);
-            }
-        } catch (IOException e) {
-            System.err.println("Errore copia file: " + e.getMessage());
-        }
-    }
+    
+    
+    
     
     /**
      * Esegue il parsing del file CSV delle proiezioni.
