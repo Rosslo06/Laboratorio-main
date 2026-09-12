@@ -6,8 +6,10 @@ import java.time.LocalDate;
  * Classe che rappresenta un cliente nel sistema CineMax.
  * Estende la classe Utente e permette di effettuare e gestire prenotazioni.
  * 
- * @author Andrea
- * @version 1.0
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public class Cliente extends Utente {
     

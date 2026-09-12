@@ -8,8 +8,12 @@ import java.util.*;
 /**
  * Classe di utilità che gestisce la persistenza dei dati del sistema CineMax.
  * 
- * @author Andrea
- * @version 1.3
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
+ * 
+ * 
  */
 public class GestoreDati {
 

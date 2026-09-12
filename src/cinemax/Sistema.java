@@ -6,8 +6,10 @@ import java.util.*;
 /**
  * Classe principale che gestisce la logica dell'applicazione CineMax.
  * 
- * @author Andrea
- * @version 1.1
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public class Sistema {
     private List<Proiezione> proiezioni;

@@ -6,8 +6,10 @@ import java.time.LocalDateTime;
  * Classe che rappresenta una proiezione nel sistema CineMax.
  * Associa un film a una data, un orario, un costo e alla capienza della sala.
  * 
- * @author Andrea
- * @version 1.0
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public class Proiezione {
     private int id;

@@ -6,8 +6,10 @@ import java.time.LocalDate;
  * Classe che rappresenta un proiezionista nel sistema CineMax.
  * Estende la classe Utente e ha i permessi per aggiungere e gestire le proiezioni.
  * 
- * @author Andrea
- * @version 1.0
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public class Proiezionista extends Utente {
 

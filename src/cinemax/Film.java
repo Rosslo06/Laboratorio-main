@@ -4,8 +4,10 @@ package cinemax;
  * Classe che rappresenta un film nel sistema CineMax.
  * Contiene tutte le informazioni descrittive dell'opera cinematografica.
  * 
- * @author Andrea
- * @version 1.0
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public class Film {
     private String titolo;

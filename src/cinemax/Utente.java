@@ -7,8 +7,10 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Classe astratta che rappresenta un utente generico nel sistema CineMax
  * 
- * @author Andrea
- * @version 1.0
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public abstract class Utente {
     

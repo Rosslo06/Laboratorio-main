@@ -6,8 +6,10 @@ import java.util.UUID;
 /**
  * Classe che rappresenta una prenotazione nel sistema CineMax
  * 
- * @author Andrea
- * @version 1.0
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public class Prenotazione {
     

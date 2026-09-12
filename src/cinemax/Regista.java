@@ -3,8 +3,10 @@ package cinemax;
 /**
  * Classe di supporto che rappresenta un regista nel sistema CineMax.
  * 
- * @author Andrea
- * @version 1.0
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public class Regista {
     private String nome;

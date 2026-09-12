@@ -6,8 +6,10 @@ import java.time.LocalDate;
  * Classe che rappresenta un bigliettaio nel sistema CineMax.
  * Estende la classe Utente e ha i permessi per gestire e visualizzare le prenotazioni in cassa.
  * 
- * @author Andrea
- * @version 1.0
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public class Bigliettaio extends Utente {
     
