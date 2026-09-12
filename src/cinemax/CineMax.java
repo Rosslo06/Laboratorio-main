@@ -9,8 +9,10 @@ import java.util.Scanner;
  * Classe principale dell'applicazione CineMax.
  * Gestisce il loop principale e l'interfaccia utente interattiva da terminale (TUI).
  * 
- * @author Andrea
- * @version 1.0
+ * @author Rossetti Andrea
+ * @author Segato Alessandro
+ * @author Bergamo Emma
+ * @author Piccolo Matteo
  */
 public class CineMax {
     private Sistema sistema;
